@@ -7,7 +7,7 @@ class Plugin{
     return new Promise(function(Resolve){
       let Stream = NodeStream.Transform({objectMode: true})
       Stream._transform = function(Buffer, Encoding, Callback){
-        Promise.resolve(Me.Process(Buffer.toString(), Options)).then(function(Contents){
+        Promise.resolve(Me.Process(Buffer.toString("utf8"), Options)).then(function(Contents){
           Stream.push(Contents)
           Callback()
         })
