@@ -26,11 +26,11 @@ class UCompiler{
           Valid.push(Plugin)
         }
       }
-      Resolve(Promise.all(Valid.sort(function(a, b){
+      Resolve(Valid.sort(function(a, b){
           return a.Info.Priority - b.Info.Priority
         }).map(function(Plugin){
           return Plugin.Stream(Options)
-        })))
+        }))
     }).then(function(Streams){
         for(let _Stream of Streams){
           Stream = Stream.pipe(_Stream)
@@ -38,11 +38,28 @@ class UCompiler{
         return Stream
       })
   }
+  // To convert Streams to Promises
+  static fromStream(Stream){
+    let Deferred = Promise.defer()
+    let Buffer = []
+    Stream.on('data', function(data){
+      Buffer.push(data)
+    })
+    Stream.on('end', function(){
+      Deferred.resolve(Buffer.join(''))
+    })
+    Stream.on('error', function(error){
+      Deferred.reject(error)
+    })
+    return Deferred.promise
+  }
 }
 
 UCompiler.Plugins = new Set()
 
 // Loading Plugins
 require('../Plugins/Javascript').Register(UCompiler)
+require('../Plugins/Uglify').Register(UCompiler)
 
 module.exports = UCompiler
+
