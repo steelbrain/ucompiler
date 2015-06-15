@@ -5,18 +5,20 @@ let FS = require('fs')
 class Plugin{
   static Stream(Options){
     let Me = this
-    return new Promise(function(Resolve){
-      let Stream = new NodeStream.Transform({
-        objectMode: true,
-        transform: function(Buffer, Encoding, Callback){
-          Promise.resolve(Me.Process(Buffer.toString("utf8"), Options)).then(function(Contents){
+    let Stream = new NodeStream.Transform({
+      objectMode: true,
+      transform: function (Buffer, Encoding, Callback) {
+        new Promise(function (Resolve) {
+          Resolve(Me.Process(Buffer.toString("utf8"), Options))
+        }).then(function(Contents){
             Stream.push(Contents)
             Callback()
+          }, function(e){
+            Stream.emit('error', e)
           })
-        }
-      })
-      Resolve(Stream)
+      }
     })
+    return Stream
   }
   static ProcessTags(CommentToken, Buffer, Options){
     let Me = this
