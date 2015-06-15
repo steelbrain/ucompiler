@@ -1,6 +1,7 @@
 "use strict"
 let NodeStream = require('stream')
 let Path = require('path')
+let FS = require('fs')
 class Plugin{
   static Stream(Options){
     let Me = this
@@ -22,22 +23,16 @@ class Plugin{
       let Result
       let Promises = []
       while((Result = Regex.exec(Buffer)) !== null){
-        try {
-          if(Me.Tags.has(Result[1])){
-            Promises.push(Me.Tags.get(Result[1])(Result[1], Result[2], Buffer, Options) || '')
-          } else Promises.push(Result[0])
-        } catch(Err){
-          console.error(Err)
-          Promises.push(Result[0])
-        }
+        if(Me.Tags.has(Result[1])){
+          Promises.push(Me.Tags.get(Result[1])(Result[1], Result[2], Buffer, Options) || '')
+        } else Promises.push(Result[0])
       }
       Resolve(Promise.all(Promises))
     }).then(function(Results){
         let Regex = new RegExp(' *' + CommentToken.replace('//', '\\/\\/') + ' @([\\w-]+) "(.+)"', 'g')
-        Buffer = Buffer.replace(Regex, function(){
-          return Results.pop()
+        return Buffer.replace(Regex, function(){
+          return Results.shift()
         })
-        return Buffer
       })
   }
   static Validate(Options){
