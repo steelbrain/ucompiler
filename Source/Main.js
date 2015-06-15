@@ -6,7 +6,12 @@ let Path = require('path')
 class UCompiler{
   static compileFile(FilePath, Options){
     Options = Helpers.normalizeOptions(Options)
-    Options.File = {Path: FilePath, Extension: Path.extname(FilePath), Dir: Path.dirname(FilePath)}
+    Options.File = {
+      Path: FilePath,
+      Extension: Path.extname(FilePath),
+      Dir: Path.dirname(FilePath),
+      Name: Path.basename(FilePath)
+    }
     return UCompiler.compileStream(FS.createReadStream(FilePath), Options)
   }
   static compileString(Content, Options){
@@ -32,26 +37,22 @@ class UCompiler{
           return Plugin.Stream(Options)
         }))
     }).then(function(Streams){
+        let Deferred = Promise.defer()
+        let Buffer = []
         for(let _Stream of Streams){
           Stream = Stream.pipe(_Stream)
+          Stream.on('error', function(error){
+            Deferred.reject(error)
+          })
         }
-        return Stream
+        Stream.on('data', function(data){
+          Buffer.push(data)
+        })
+        Stream.on('end', function(){
+          Deferred.resolve(Buffer.join(''))
+        })
+        return Deferred.promise
       })
-  }
-  // To convert Streams to Promises
-  static fromStream(Stream){
-    let Deferred = Promise.defer()
-    let Buffer = []
-    Stream.on('data', function(data){
-      Buffer.push(data)
-    })
-    Stream.on('end', function(){
-      Deferred.resolve(Buffer.join(''))
-    })
-    Stream.on('error', function(error){
-      Deferred.reject(error)
-    })
-    return Deferred.promise
   }
 }
 
@@ -59,7 +60,7 @@ UCompiler.Plugins = new Set()
 
 // Loading Plugins
 require('../Plugins/Javascript').Register(UCompiler)
+require('../Plugins/Babel').Register(UCompiler)
 require('../Plugins/Uglify').Register(UCompiler)
 
 module.exports = UCompiler
-
