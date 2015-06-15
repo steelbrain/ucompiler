@@ -3,6 +3,7 @@ let Plugin = require('../Source/Plugin')
 let Path = require('path')
 class PluginJS extends Plugin{
   static Process(Contents, Options){
+    Options.SourceMap = Options.SourceMap || false
     return this.ProcessTags('//', Contents, Options)
   }
 }
@@ -13,5 +14,8 @@ PluginJS.Tags.set('Compiler-Compress', function(Name, Value, _, Options){
 })
 PluginJS.Tags.set('Compiler-Transpile', function(Name, Value, _, Options){
   Options.Transpile = Value === 'true'
+})
+PluginJS.Tags.set('Compiler-SourceMap', function(Name, Value, _, Options){
+  Options.SourceMap = Path.resolve(Path.dirname(Options.File.Path), Value)
 })
 module.exports = PluginJS
