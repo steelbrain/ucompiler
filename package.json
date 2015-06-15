@@ -1,0 +1,27 @@
+{
+  "name": "ucompiler",
+  "version": "0.0.1",
+  "description": "",
+  "main": "Source/Main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "uc-compile" : "./CLI/Compile.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/steelbrain/UCompiler.git"
+  },
+  "dependencies":{
+    "uglifyjs": "latest",
+    "babel-core": "latest",
+    "minimist": "latest"
+  },
+  "author": "steelbrain",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/steelbrain/UCompiler/issues"
+  },
+  "homepage": "https://github.com/steelbrain/UCompiler#readme"
+}
