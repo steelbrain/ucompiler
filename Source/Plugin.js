@@ -52,4 +52,11 @@ Plugin.Tags = new Map()
 Plugin.Tags.set('Compiler-Output', function(Name, Value, Buffer, Options){
   Options.Output = Path.resolve(Path.dirname(Options.File.Path), Value)
 })
+Plugin.Tags.set('Compiler-Include', function(Name, Value, Buffer, Options){
+  return new Promise(function(Resolve){
+    FS.readFile(Path.resolve(Path.dirname(Options.File.Path), Value), function(_, Contents){
+      Resolve(Contents || ' ')
+    })
+  })
+})
 module.exports = Plugin
