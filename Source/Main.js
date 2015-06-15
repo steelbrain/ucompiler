@@ -6,7 +6,7 @@ let Path = require('path')
 class UCompiler{
   static compileFile(FilePath, Options){
     Options = Helpers.normalizeOptions(Options)
-    Options.File = {Path: FilePath, Extension: Path.extname(FilePath)}
+    Options.File = {Path: FilePath, Extension: Path.extname(FilePath), Dir: Path.dirname(FilePath)}
     return UCompiler.compileStream(FS.createReadStream(FilePath), Options)
   }
   static compileString(Content, Options){
@@ -44,11 +44,5 @@ UCompiler.Plugins = new Set()
 
 // Loading Plugins
 require('../Plugins/Javascript').Register(UCompiler)
-
-UCompiler.compileFile('/var/web/PublishSpace/dQuery/Source/Main.js').then(function(Stream){
-   Stream.pipe(process.stdout)
-}).catch(function(err){
-  console.error(err)
-})
 
 module.exports = UCompiler
