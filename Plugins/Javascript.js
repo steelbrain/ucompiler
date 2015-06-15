@@ -6,6 +6,7 @@ class PluginJS extends Plugin{
     return this.ProcessTags('//', Contents, Options)
   }
 }
+PluginJS.Initialize()
 PluginJS.Info.Extensions = ['.js']
 PluginJS.Tags.set('Compiler-Compress', function(Name, Value, _, Options){
   Options.Compress = Value === 'true'

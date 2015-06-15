@@ -9,6 +9,7 @@ class UglifyJS extends Plugin{
     return Uglify.minify(Contents, {fromString: true}).code
   }
 }
+UglifyJS.Initialize()
 UglifyJS.Info.Priority = 100
 UglifyJS.Info.Extensions = ['.js']
 module.exports = UglifyJS

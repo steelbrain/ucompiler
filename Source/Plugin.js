@@ -3,6 +3,19 @@ let NodeStream = require('stream')
 let Path = require('path')
 let FS = require('fs')
 class Plugin{
+  static Initialize(){
+    this.Tags = new Map()
+    this.Tags.set('Compiler-Output', function(Name, Value, Buffer, Options){
+      Options.Output = Path.resolve(Path.dirname(Options.File.Path), Value)
+    })
+    this.Tags.set('Compiler-Include', function(Name, Value, Buffer, Options){
+      return new Promise(function(Resolve){
+        FS.readFile(Path.resolve(Path.dirname(Options.File.Path), Value), function(_, Contents){
+          Resolve(Contents || ' ')
+        })
+      })
+    })
+  }
   static Stream(Options){
     let Me = this
     let Stream = new NodeStream.Transform({
@@ -52,15 +65,4 @@ Plugin.Info = {
   Priority: 1,
   Extensions: []
 }
-Plugin.Tags = new Map()
-Plugin.Tags.set('Compiler-Output', function(Name, Value, Buffer, Options){
-  Options.Output = Path.resolve(Path.dirname(Options.File.Path), Value)
-})
-Plugin.Tags.set('Compiler-Include', function(Name, Value, Buffer, Options){
-  return new Promise(function(Resolve){
-    FS.readFile(Path.resolve(Path.dirname(Options.File.Path), Value), function(_, Contents){
-      Resolve(Contents || ' ')
-    })
-  })
-})
 module.exports = Plugin
