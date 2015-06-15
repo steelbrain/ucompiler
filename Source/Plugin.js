@@ -6,13 +6,15 @@ class Plugin{
   static Stream(Options){
     let Me = this
     return new Promise(function(Resolve){
-      let Stream = NodeStream.Transform({objectMode: true})
-      Stream._transform = function(Buffer, Encoding, Callback){
-        Promise.resolve(Me.Process(Buffer.toString("utf8"), Options)).then(function(Contents){
-          Stream.push(Contents)
-          Callback()
-        })
-      }
+      let Stream = new NodeStream.Transform({
+        objectMode: true,
+        transform: function(Buffer, Encoding, Callback){
+          Promise.resolve(Me.Process(Buffer.toString("utf8"), Options)).then(function(Contents){
+            Stream.push(Contents)
+            Callback()
+          })
+        }
+      })
       Resolve(Stream)
     })
   }
