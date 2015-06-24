@@ -1,9 +1,10 @@
 "use strict"
 let Plugin = require('../Source/Plugin')
 let Path = require('path')
-let Coffee = require('coffee-script')
+let Coffee
 class PluginCoffee extends Plugin{
   static Process(Contents, Options){
+    Coffee = Coffee || require('coffee-script')
     Options.SourceMap = Options.SourceMap || false
     Options.Bare = Options.Bare || false
     return this.ProcessTags('#', Contents, Options).then(function(Code){
