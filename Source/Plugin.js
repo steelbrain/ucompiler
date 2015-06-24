@@ -15,6 +15,11 @@ class Plugin{
         })
       })
     })
+    this.Info = {
+      Name: "Plugin",
+      Priority: 1,
+      Extensions: []
+    }
   }
   static Stream(Options){
     let Me = this
@@ -60,9 +65,4 @@ class Plugin{
   }
 }
 
-Plugin.Info = {
-  Name: "Plugin",
-  Priority: 1,
-  Extensions: []
-}
 module.exports = Plugin
