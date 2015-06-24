@@ -11,5 +11,5 @@ class UglifyJS extends Plugin{
 }
 UglifyJS.Initialize()
 UglifyJS.Info.Priority = 100
-UglifyJS.Info.Extensions = ['.js']
+UglifyJS.Info.Extensions = ['.js', '.coffee']
 module.exports = UglifyJS
