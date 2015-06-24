@@ -5,7 +5,7 @@ let Coffee = require('coffee-script')
 class PluginCoffee extends Plugin{
   static Process(Contents, Options){
     Options.SourceMap = Options.SourceMap || false
-    Options.Bare = Options.SourceMap || false
+    Options.Bare = Options.Bare || false
     return this.ProcessTags('#', Contents, Options).then(function(Code){
       let Compiled = Coffee.compile(Code, {
         sourceMap: Options.SourceMap,
