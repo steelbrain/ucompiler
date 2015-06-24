@@ -17,7 +17,8 @@
     "uglifyjs": "latest",
     "babel-core": "latest",
     "minimist": "latest",
-    "coffee-script": "latest"
+    "coffee-script": "latest",
+    "less": "latest"
   },
   "author": "steelbrain",
   "license": "MIT",
