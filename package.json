@@ -16,7 +16,8 @@
   "dependencies":{
     "uglifyjs": "latest",
     "babel-core": "latest",
-    "minimist": "latest"
+    "minimist": "latest",
+    "coffee-script": "latest"
   },
   "author": "steelbrain",
   "license": "MIT",
