@@ -9,7 +9,7 @@ class UCompiler{
     Options.File = {
       Path: FilePath,
       Extension: Path.extname(FilePath),
-      Dir: Path.dirname(FilePath),
+      Dir: Path.resolve(Path.dirname(FilePath)),
       Name: Path.basename(FilePath)
     }
     return UCompiler.compileStream(FS.createReadStream(FilePath), Options)
@@ -62,5 +62,6 @@ UCompiler.Plugins = new Set()
 require('../Plugins/Javascript').Register(UCompiler)
 require('../Plugins/Babel').Register(UCompiler)
 require('../Plugins/Uglify').Register(UCompiler)
+require('../Plugins/Coffee').Register(UCompiler)
 
 module.exports = UCompiler
