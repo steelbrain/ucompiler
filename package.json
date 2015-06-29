@@ -18,7 +18,8 @@
     "babel-core": "latest",
     "minimist": "latest",
     "coffee-script": "latest",
-    "less": "latest"
+    "less": "latest",
+    "sourcemap": "latest"
   },
   "author": "steelbrain",
   "license": "MIT",
