@@ -40,22 +40,15 @@ class Plugin{
   }
   static ProcessTags(CommentToken, Buffer, Options){
     let Regex = new RegExp(' *' + CommentToken.replace('//', '\\/\\/') + ' @([\\w-]+) "(.+)"', 'g')
-    let Results = []
-    let Sequence = Promise.resolve()
+    let Promises = []
     for(let Result; (Result = Regex.exec(Buffer)) !== null;){
       let Value
       if(this.Tags.has(Result[1])){
         Value = this.Tags.get(Result[1])(Result[1], Result[2], Buffer, Options) || ''
       } else Value = Result[0]
-      Sequence = Sequence.then(function(){
-        if(Value && Value.constructor.name === 'Promise'){
-          return Value.then(function(Value){
-            Results.push(Value)
-          })
-        } else Results.push(Value)
-      })
+      Promises.push(Value)
     }
-    return Sequence.then(function(){
+    return Promise.all(Promises).then(function(Results){
       let Regex = new RegExp(' *' + CommentToken.replace('//', '\\/\\/') + ' @([\\w-]+) "(.+)"', 'g')
       return Buffer.replace(Regex, function(){
         return Results.shift()
