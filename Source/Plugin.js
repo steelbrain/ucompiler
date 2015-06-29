@@ -39,23 +39,30 @@ class Plugin{
     return Stream
   }
   static ProcessTags(CommentToken, Buffer, Options){
-    let Me = this
-    return new Promise(function(Resolve){
-      let Regex = new RegExp(' *' + CommentToken.replace('//', '\\/\\/') + ' @([\\w-]+) "(.+)"', 'g')
-      let Result
-      let Promises = []
-      while((Result = Regex.exec(Buffer)) !== null){
-        if(Me.Tags.has(Result[1])){
-          Promises.push(Me.Tags.get(Result[1])(Result[1], Result[2], Buffer, Options) || '')
-        } else Promises.push(Result[0])
-      }
-      Resolve(Promise.all(Promises))
-    }).then(function(Results){
-        let Regex = new RegExp(' *' + CommentToken.replace('//', '\\/\\/') + ' @([\\w-]+) "(.+)"', 'g')
-        return Buffer.replace(Regex, function(){
-          return Results.shift()
-        })
+    let Regex = new RegExp(' *' + CommentToken.replace('//', '\\/\\/') + ' @([\\w-]+) "(.+)"', 'g')
+    let Results = []
+    let Sequence = Promise.resolve()
+    for(let Result; (Result = Regex.exec(Buffer)) !== null;){
+      let Value
+      if(this.Tags.has(Result[1])){
+        Value = this.Tags.get(Result[1])(Result[1], Result[2], Buffer, Options) || ''
+      } else Value = Result[0]
+      Sequence = Sequence.then(function(){
+        if(Value && Value.constructor.name === 'Promise'){
+          return Value.then(function(Value){
+            Results.push(Value)
+          })
+        } else Results.push(Value)
       })
+    }
+    return Sequence.then(function(){
+      return Results
+    }).then(function(Results){
+      let Regex = new RegExp(' *' + CommentToken.replace('//', '\\/\\/') + ' @([\\w-]+) "(.+)"', 'g')
+      return Buffer.replace(Regex, function(){
+        return Results.shift()
+      })
+    })
   }
   static Validate(Options){
     return this.Info.Extensions.indexOf(Options.File.Extension) !== -1
