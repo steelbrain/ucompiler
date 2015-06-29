@@ -26,14 +26,14 @@ class Plugin{
     var Stream = new NodeStream.Transform({
       objectMode: true,
       transform: function (Buffer, Encoding, Callback) {
-        new Promise(function (Resolve) {
-          Resolve(Me.Process(Buffer.toString("utf8"), Options))
+        Promise.resolve().then(function(){
+          return Me.Process(Buffer.toString("utf8"), Options)
         }).then(function(Contents){
-            Stream.push(Contents)
-            Callback()
-          }, function(e){
-            Stream.emit('error', e)
-          })
+          Stream.push(Contents)
+          Callback()
+        }).catch(function(e){
+          Stream.emit('error', e)
+        })
       }
     })
     return Stream
