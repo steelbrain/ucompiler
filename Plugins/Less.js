@@ -24,10 +24,10 @@ class Less extends Plugin{
 Less.Initialize()
 Less.Info.Priority = 1
 Less.Info.Extensions = ['.less']
-Less.Tags['Compiler-Compress'] = function(Name, Value, _, Options){
+Less.Tags.set('Compiler-Compress', function(Name, Value, _, Options){
   Options.Compress = Value === 'true'
-}
-Less.Tags['Compiler-SourceMap'] = function(Name, Value, _, Options){
+})
+Less.Tags.set('Compiler-SourceMap', function(Name, Value, _, Options){
   Options.SourceMap = Path.resolve(Path.dirname(Options.File.Path), Value)
-}
+})
 module.exports = Less

@@ -4,17 +4,17 @@ let Path = require('path')
 let FS = require('fs')
 class Plugin{
   static Initialize(){
-    this.Tags = []
-    this.Tags['Compiler-Output'] = function(Name, Value, Buffer, Options){
+    this.Tags = new Map()
+    this.Tags.set('Compiler-Output', function(Name, Value, Buffer, Options){
       Options.Output = Path.resolve(Path.dirname(Options.File.Path), Value)
-    }
-    this.Tags['Compiler-Include'] = function(Name, Value, Buffer, Options){
+    })
+    this.Tags.set('Compiler-Include', function(Name, Value, Buffer, Options){
       return new Promise(function(Resolve){
         FS.readFile(Path.resolve(Path.dirname(Options.File.Path), Value), function(_, Contents){
           Resolve(Contents || ' ')
         })
       })
-    }
+    })
     this.Info = {
       Name: "Plugin",
       Priority: 1,
@@ -45,7 +45,7 @@ class Plugin{
       let Result
       let Promises = []
       while((Result = Regex.exec(Buffer)) !== null){
-        if(Me.Tags.indexOf(Result[1]) !== -1){
+        if(Me.Tags.has(Result[1])){
           Promises.push(Me.Tags.get(Result[1])(Result[1], Result[2], Buffer, Options) || '')
         } else Promises.push(Result[0])
       }
