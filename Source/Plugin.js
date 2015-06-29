@@ -23,7 +23,7 @@ class Plugin{
   }
   static Stream(Options){
     let Me = this
-    let Stream = new NodeStream.Transform({
+    var Stream = new NodeStream.Transform({
       objectMode: true,
       transform: function (Buffer, Encoding, Callback) {
         new Promise(function (Resolve) {
@@ -56,8 +56,6 @@ class Plugin{
       })
     }
     return Sequence.then(function(){
-      return Results
-    }).then(function(Results){
       let Regex = new RegExp(' *' + CommentToken.replace('//', '\\/\\/') + ' @([\\w-]+) "(.+)"', 'g')
       return Buffer.replace(Regex, function(){
         return Results.shift()
