@@ -9,13 +9,13 @@ class PluginJS extends Plugin{
 }
 PluginJS.Initialize()
 PluginJS.Info.Extensions = ['.js']
-PluginJS.Tags.set('Compiler-Compress', function(Name, Value, _, Options){
+PluginJS.Tags['Compiler-Compress'] = function(Name, Value, _, Options){
   Options.Compress = Value === 'true'
-})
-PluginJS.Tags.set('Compiler-Transpile', function(Name, Value, _, Options){
+}
+PluginJS.Tags['Compiler-Transpile'] = function(Name, Value, _, Options){
   Options.Transpile = Value === 'true'
-})
-PluginJS.Tags.set('Compiler-SourceMap', function(Name, Value, _, Options){
+}
+PluginJS.Tags['Compiler-SourceMap'] = function(Name, Value, _, Options){
   Options.SourceMap = Path.resolve(Path.dirname(Options.File.Path), Value)
-})
+}
 module.exports = PluginJS

@@ -25,13 +25,13 @@ class PluginCoffee extends Plugin{
 }
 PluginCoffee.Initialize()
 PluginCoffee.Info.Extensions = ['.coffee']
-PluginCoffee.Tags.set('Compiler-Compress', function(Name, Value, _, Options){
+PluginCoffee.Tags['Compiler-Compress'] = function(Name, Value, _, Options){
   Options.Compress = Value === 'true'
-})
-PluginCoffee.Tags.set('Compiler-Bare', function(Name, Value, _, Options){
+}
+PluginCoffee.Tags['Compiler-Bare'] = function(Name, Value, _, Options){
   Options.Bare = Value === 'true'
-})
-PluginCoffee.Tags.set('Compiler-SourceMap', function(Name, Value, _, Options){
+}
+PluginCoffee.Tags['Compiler-SourceMap'] = function(Name, Value, _, Options){
   Options.SourceMap = Path.resolve(Path.dirname(Options.File.Path), Value)
-})
+}
 module.exports = PluginCoffee
