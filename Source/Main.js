@@ -64,5 +64,6 @@ require('../Plugins/Babel').Register(UCompiler)
 require('../Plugins/Uglify').Register(UCompiler)
 require('../Plugins/Coffee').Register(UCompiler)
 require('../Plugins/Less').Register(UCompiler)
+require('../Plugins/Browserify').Register(UCompiler)
 
 module.exports = UCompiler
