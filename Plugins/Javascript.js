@@ -18,4 +18,7 @@ PluginJS.Tags.set('Compiler-Transpile', function(Name, Value, _, Options){
 PluginJS.Tags.set('Compiler-SourceMap', function(Name, Value, _, Options){
   Options.SourceMap = Path.resolve(Path.dirname(Options.File.Path), Value)
 })
+PluginJS.Tags.set('Compiler-Browserify', function(_, Value, __, Options){
+  Options.Browserify = Value === 'true'
+})
 module.exports = PluginJS

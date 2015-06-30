@@ -34,4 +34,7 @@ PluginCoffee.Tags.set('Compiler-Bare', function(Name, Value, _, Options){
 PluginCoffee.Tags.set('Compiler-SourceMap', function(Name, Value, _, Options){
   Options.SourceMap = Path.resolve(Path.dirname(Options.File.Path), Value)
 })
+PluginCoffee.Tags.set('Compiler-Browserify', function(_, Value, __, Options){
+  Options.Browserify = Value === 'true'
+})
 module.exports = PluginCoffee
