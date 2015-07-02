@@ -7,19 +7,21 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "uc-compile" : "./CLI/Compile.js"
+    "uc-compile": "./CLI/Compile.js",
+    "uc-watch": "./CLI/Watch.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/steelbrain/UCompiler.git"
   },
-  "dependencies":{
-    "uglifyjs": "latest",
+  "dependencies": {
     "babel-core": "latest",
-    "minimist": "latest",
+    "browserify": "latest",
     "coffee-script": "latest",
     "less": "latest",
-    "browserify": "latest"
+    "minimist": "latest",
+    "node-fswatcher": "^1.0.1",
+    "uglifyjs": "latest"
   },
   "author": "steelbrain",
   "license": "MIT",
