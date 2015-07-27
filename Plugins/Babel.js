@@ -13,6 +13,6 @@ class Babel extends Plugin{
   }
 }
 Babel.Initialize()
-Babel.Info.Priority = 50
+Babel.Info.Priority = 100
 Babel.Info.Extensions = ['.js']
 module.exports = Babel

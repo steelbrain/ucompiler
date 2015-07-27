@@ -30,6 +30,6 @@ class BrowserifyJS extends Plugin{
   }
 }
 BrowserifyJS.Initialize()
-BrowserifyJS.Info.Priority = 100
+BrowserifyJS.Info.Priority = 50
 BrowserifyJS.Info.Extensions = ['.js', '.coffee']
 module.exports = BrowserifyJS
