@@ -1,13 +1,18 @@
 'use strict'
 
+const FS = require('fs')
 const Base = require('./base')
 
 class GenericPlugin extends Base {
   constructor() {
     super()
-    this.registerTag(['Compiler-Output'], function(name, value, contents, options) {
-      console.log('got to that thing')
-      return "Hey"
+    this.registerTag(['Compiler-Include'], function(name, value) {
+      return new Promise((resolve, reject) =>
+        FS.readFile(value, function(err, data) {
+          if (err) reject(err)
+          else resolve(data.toString())
+        })
+      )
     })
   }
   compile(contents, options) {
