@@ -44,7 +44,7 @@ class Plugin {
       )
     , Promise.resolve(_))
   }
-  compile(contents, options) {
+  compile(contents) {
     return contents
   }
 }
