@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 "use strict"
-let Main = require('../Source/Main')
+let Main = require('../lib/main-with-plugins')
 let Minimist = require('minimist')
 let FSWatcher = require('node-fswatcher')
 let Options = Minimist(process.argv.slice(2))

@@ -1,14 +1,14 @@
 {
   "name": "ucompiler",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "",
-  "main": "Source/Main.js",
+  "main": "lib/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "uc-compile": "./CLI/Compile.js",
-    "uc-watch": "./CLI/Watch.js"
+    "uc-compile": "./cli/Compile.js",
+    "uc-watch": "./cli/Watch.js"
   },
   "repository": {
     "type": "git",
@@ -21,6 +21,7 @@
     "less": "latest",
     "minimist": "latest",
     "node-fswatcher": "^1.0.1",
+    "sb-stream-promise": "^0.0.3",
     "uglifyjs": "latest"
   },
   "author": "steelbrain",
