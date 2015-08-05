@@ -6,9 +6,6 @@ let Uglify
 class PluginBabel extends Base {
   constructor() {
     super()
-    this.registerTag(['Compiler-Compress', 'Compiler-Uglify'], function(name, value, options) {
-      options.Uglify = value === 'true'
-    })
   }
   compile(contents, options) {
     return this.executeTags(contents, options).then(contents => {
