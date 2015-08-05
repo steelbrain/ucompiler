@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "uc-compile": "./CLI/Compile.js",
-    "uc-watch": "./CLI/Watch.js"
+    "uc-compile": "./cli/Compile.js",
+    "uc-watch": "./cli/Watch.js"
   },
   "repository": {
     "type": "git",
