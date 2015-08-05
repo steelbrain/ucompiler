@@ -14,7 +14,7 @@ class GenericPlugin extends Base {
         })
       )
     })
-    this.registerTag(['Compiler-Output'], function(name, value, contents, options) {
+    this.registerTag(['Compiler-Output'], function(name, value, options) {
       options.Output = value
     })
   }
