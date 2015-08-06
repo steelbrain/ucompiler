@@ -1,5 +1,6 @@
 'use strict'
 
+const Path = require('path')
 const Stream = require('stream')
 const Base = require('./base')
 let Browserify
@@ -26,6 +27,7 @@ class PluginBrowserify extends Base {
         debug: options.SourceMap,
         fullPaths: false,
         filename: options.internal.file.path,
+        paths: [Path.join(__dirname, '../node_modules/')]
       })
       if (options.Babel) {
         Babelify = Babelify || require('babelify').configure({ optional: ["runtime"] })
@@ -35,6 +37,9 @@ class PluginBrowserify extends Base {
         browserified.bundle(function(err, buffer) {
           if (err) reject(err)
           else resolve(buffer.toString())
+        })
+        browserified.pipeline.on('file', function(file){
+          options.internal.imports.push(file)
         })
       })
     })
