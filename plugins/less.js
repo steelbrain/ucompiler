@@ -3,7 +3,7 @@
 const Base = require('./base')
 let LessJS
 
-class PluginCoffee extends Base {
+class PluginLess extends Base {
   constructor() {
     super()
   }
@@ -17,10 +17,13 @@ class PluginCoffee extends Base {
         compress: options.Compress,
       }, function(error, output) {
         if (error) reject(error)
-        else resolve(output.css)
+        else {
+          options.internal.imports = output.imports
+          resolve(output.css)
+        }
       })
     })
   }
 }
 
-module.exports = PluginCoffee
+module.exports = PluginLess

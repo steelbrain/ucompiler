@@ -7,6 +7,7 @@ let FS = require('fs')
 try {
   if(!Options['_'].length) throw new Error("Please specify a file to compile")
   Main.compileFile(Options['_'][0], Options).then(function(Output) {
+    Output = Output.contents
     if(Options.Output){
       FS.writeFileSync(Options.Output, Output)
     } else {

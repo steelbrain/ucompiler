@@ -13,6 +13,7 @@ try {
     FS.access(Info.Path, FS.R_OK, function(err){
       if(!err)
         Main.compileFile(Info.Path, Options).then(function(Output) {
+          Output = Output.contents
           if(Options.Output){
             FS.writeFileSync(Options.Output, Output)
           }
