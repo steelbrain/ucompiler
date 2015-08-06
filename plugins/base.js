@@ -20,18 +20,19 @@ class Plugin {
     })
   }
   executeTags(_, options) {
-    return this.tags.reduce((promise, value) =>
-      promise.then(__ =>
-        value.expressions.reduce((nestedPromise, entry) =>
-          nestedPromise.then(function(contents) {
+    const that = this
+    return this.tags.reduce(function(promise, value){
+      return promise.then(function(_){
+        return value.expressions.reduce(function(promise, entry){
+          return promise.then(function(contents){
             const matches = []
             const promises = []
             let match
             while ((match = entry.exec(contents)) !== null) {
               matches.push(match[0])
-              promises.push(Promise.resolve(value.callback(match[1], match[2] || match[3] || '', options)).then(data => data || ''))
+              promises.push(Promise.resolve(value.callback(match[1], match[2] || match[3] || '', options)))
             }
-            return Promise.all(promises).then(results => {
+            return Promise.all(promises).then(function(results) {
               while (results.length) {
                 const result = results.pop()
                 const matchEntry = matches.pop()
@@ -40,9 +41,9 @@ class Plugin {
               return contents
             })
           })
-        , Promise.resolve(__))
-      )
-    , Promise.resolve(_))
+        }, Promise.resolve(_))
+      })
+    }, Promise.resolve(_))
   }
   compile(contents) {
     return contents

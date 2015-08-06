@@ -11,7 +11,7 @@ class PluginBabel extends Base {
     })
   }
   compile(contents, options) {
-    return this.executeTags(contents, options).then(contents => {
+    return this.executeTags(contents, options).then(function(contents) {
       if (!options.Babel) return contents
       BabelJS = BabelJS || require('babel-core')
       return BabelJS.transform(contents, {

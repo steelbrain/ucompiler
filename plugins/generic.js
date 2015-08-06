@@ -7,12 +7,12 @@ class GenericPlugin extends Base {
   constructor() {
     super()
     this.registerTag(['Compiler-Include'], function(name, value) {
-      return new Promise((resolve, reject) =>
-        FS.readFile(value, function(err, data) {
+      return new Promise(function(resolve, reject) {
+        FS.readFile(value, function (err, data) {
           if (err) reject(err)
           else resolve(data.toString())
         })
-      )
+      })
     })
     this.registerTag(['Compiler-Output'], function(name, value, options) {
       options.Output = value

@@ -11,7 +11,7 @@ class PluginCoffee extends Base {
     })
   }
   compile(contents, options) {
-    return this.executeTags(contents, options).then(contents => {
+    return this.executeTags(contents, options).then(function(contents) {
       Coffee = Coffee || require('coffee-script')
       const compiled = Coffee.compile(contents, {
         sourceMap: options.SourceMap,

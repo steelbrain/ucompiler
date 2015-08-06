@@ -12,7 +12,7 @@ class PluginBrowserify extends Base {
     })
   }
   compile(contents, options) {
-    return this.executeTags(contents, options).then(contents => {
+    return this.executeTags(contents, options).then(function(contents) {
       if (!options.Browserify) return contents
       Browserify = Browserify || require('browserify')
       const Readable = new Stream.Readable()
