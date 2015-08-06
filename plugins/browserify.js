@@ -3,6 +3,7 @@
 const Stream = require('stream')
 const Base = require('./base')
 let Browserify
+let Babelify
 
 class PluginBrowserify extends Base {
   constructor() {
@@ -20,12 +21,16 @@ class PluginBrowserify extends Base {
         Readable.push(contents)
         Readable.push(null)
       }
-      const browserified = new Browserify(Readable, {
+      let browserified = new Browserify(Readable, {
         basedir: options.internal.file.directory,
         debug: options.SourceMap,
         fullPaths: false,
         filename: options.internal.file.path,
       })
+      if (options.Babel) {
+        Babelify = Babelify || require('babelify').configure({ optional: ["runtime"] })
+        browserified = browserified.transform(Babelify)
+      }
       return new Promise(function(resolve, reject) {
         browserified.bundle(function(err, buffer) {
           if (err) reject(err)
