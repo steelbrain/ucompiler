@@ -30,7 +30,9 @@ class Plugin {
             let match
             while ((match = entry.exec(contents)) !== null) {
               matches.push(match[0])
-              promises.push(Promise.resolve(value.callback(match[1], match[2] || match[3] || '', options)))
+              promises.push(Promise.resolve(value.callback(match[1], match[2] || match[3] || '', options))
+                .then(function(result){ return result || '' })
+              )
             }
             return Promise.all(promises).then(function(results) {
               while (results.length) {
