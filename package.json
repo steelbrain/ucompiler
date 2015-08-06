@@ -1,7 +1,7 @@
 {
   "name": "ucompiler",
-  "version": "0.0.9",
-  "description": "",
+  "version": "0.0.10",
+  "description": "Universal assets compiler",
   "main": "lib/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
