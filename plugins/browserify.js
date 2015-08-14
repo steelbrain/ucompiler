@@ -32,7 +32,6 @@ class PluginBrowserify extends Base {
       })
       if (options.Babel) {
         Babelify = Babelify || require('babelify').configure({
-          optional: ["runtime"],
           blacklist: options.BlackList
         })
         browserified = browserified.transform(Babelify)
