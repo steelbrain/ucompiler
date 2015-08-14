@@ -9,10 +9,12 @@ class PluginBabel extends Base {
   }
   compile(contents, options) {
     if (!options.Babel || options.Browserify) return contents
+    options.BlackList = options.BlackList instanceof Array ? options.BlackList : []
     BabelJS = BabelJS || require('babel-core')
     return BabelJS.transform(contents, {
       filenameRelative: options.internal.file.name,
       sourceRoot: options.internal.file.directory,
+      blacklist: options.BlackList
     }).code
   }
 }

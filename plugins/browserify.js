@@ -14,6 +14,7 @@ class PluginBrowserify extends Base {
     })
   }
   compile(contents, options) {
+    options.BlackList = options.BlackList instanceof Array ? options.BlackList : []
     return this.executeTags(contents, options).then(function(contents) {
       if (!options.Browserify) return contents
       Browserify = Browserify || require('browserify')
@@ -30,7 +31,10 @@ class PluginBrowserify extends Base {
         paths: [Path.join(__dirname, '../node_modules/')]
       })
       if (options.Babel) {
-        Babelify = Babelify || require('babelify').configure({ optional: ["runtime"] })
+        Babelify = Babelify || require('babelify').configure({
+          optional: ["runtime"],
+          blacklist: options.BlackList
+        })
         browserified = browserified.transform(Babelify)
       }
       return new Promise(function(resolve, reject) {
