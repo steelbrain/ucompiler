@@ -19,6 +19,7 @@
     "babel-runtime": "^5.8.20",
     "babelify": "^6.1.3",
     "browserify": "latest",
+    "childprocess-promise": "^1.0.1",
     "coffee-script": "latest",
     "less": "latest",
     "minimist": "latest",
