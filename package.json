@@ -22,7 +22,7 @@
     "coffee-script": "latest",
     "less": "latest",
     "minimist": "latest",
-    "node-fswatcher": "^1.0.1",
+    "node-fswatcher": "^1.0.3",
     "sb-stream-promise": "^0.0.3",
     "uglifyjs": "latest"
   },
