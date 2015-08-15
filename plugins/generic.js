@@ -1,6 +1,7 @@
 'use strict'
 
 const FS = require('fs')
+const Path = require('path')
 const Base = require('./base')
 
 class GenericPlugin extends Base {
@@ -15,7 +16,7 @@ class GenericPlugin extends Base {
       })
     })
     this.registerTag(['Compiler-Output'], function(name, value, options) {
-      options.Output = value
+      options.Output = Path.resolve(options.internal.file.directory, value)
     })
     this.registerTag(['Compiler-Compress', 'Compiler-Uglify'], function(name, value, options) {
       options.Uglify = value === 'true'
