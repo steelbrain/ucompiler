@@ -8,6 +8,7 @@ try {
   Options.blacklist = String(Options.blacklist || '').split(',').map(function(e) { return e.trim() }).filter(function(e) { return e && e !== 'true' })
   if(!Options['_'].length) throw new Error("Please specify a file to compile")
   Main.compileFile(Options['_'][0], Options).then(function(Output) {
+    Options = Output.options
     Output = Output.contents
     if(Options.Output){
       FS.writeFileSync(Options.Output, Output)
