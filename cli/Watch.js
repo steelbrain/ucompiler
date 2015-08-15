@@ -6,6 +6,7 @@ let FSWatcher = require('node-fswatcher')
 let Options = Minimist(process.argv.slice(2))
 let FS = require('fs')
 try {
+  Options.blacklist = String(Options.blacklist || '').split(',').map(function(e) { return e.trim() }).filter(function(e) { return e && e !== 'true' })
   if(!Options['_'].length) throw new Error("Please specify a file/directory to watch")
   let Watcher = new FSWatcher
   Watcher.watch(Options['_'][0])
