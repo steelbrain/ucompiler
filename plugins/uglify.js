@@ -9,7 +9,7 @@ class PluginUglify extends Base {
   }
   compile(contents, options) {
     return this.executeTags(contents, options).then(function(contents) {
-      if (!options.Uglify) return contents
+      if (!options.Uglify && !options.Compress) return contents
       Uglify = Uglify || require('uglifyjs')
       return Uglify.minify(contents, {fromString: true}).code
     })
