@@ -11,7 +11,7 @@ class Plugin {
 
     const Me = this
     expressions = expressions.map(function(entry) {
-      return new RegExp('^\\s*?' + Me.commentToken + '\\s*?@?(' + entry + ')\\s+(?:"(.*?)"|(.*))', 'g')
+      return new RegExp('\\s*?' + Me.commentToken + '\\s*?@?(' + entry + ')\\s+(?:"(.*?)"|(.*))', 'g')
     })
     this.tags.push({
       callback: callback,
