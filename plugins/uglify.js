@@ -3,7 +3,7 @@
 const Base = require('./base')
 let Uglify
 
-class PluginBabel extends Base {
+class PluginUglify extends Base {
   constructor() {
     super()
   }
@@ -16,4 +16,4 @@ class PluginBabel extends Base {
   }
 }
 
-module.exports = PluginBabel
+module.exports = PluginUglify
