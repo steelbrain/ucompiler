@@ -13,7 +13,7 @@ class PluginBabel extends Base {
     return BabelJS.transform(contents, {
       filenameRelative: options.internal.file.name,
       sourceRoot: options.internal.file.directory,
-      blacklist: options.blacklist
+      blacklist: options.Blacklist
     }).code
   }
 }
