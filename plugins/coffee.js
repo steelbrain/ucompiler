@@ -6,6 +6,7 @@ let Coffee
 class PluginCoffee extends Base {
   constructor() {
     super()
+    this.commentToken = '\#'
     this.registerTag(['Coffee-Bare'], function(name, value, options) {
       options.CoffeeBare = value === 'true'
     })
