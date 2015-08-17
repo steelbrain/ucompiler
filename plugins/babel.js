@@ -4,9 +4,6 @@ const Base = require('./base')
 let BabelJS
 
 class PluginBabel extends Base {
-  constructor() {
-    super()
-  }
   compile(contents, options) {
     if (!options.Babel || options.Browserify) return contents
     BabelJS = BabelJS || require('babel-core')
