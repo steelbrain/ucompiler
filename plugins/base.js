@@ -19,7 +19,6 @@ class Plugin {
     })
   }
   executeTags(_, options) {
-    const that = this
     return this.tags.reduce(function(promise, value){
       return promise.then(function(_){
         return value.expressions.reduce(function(promise, entry){
