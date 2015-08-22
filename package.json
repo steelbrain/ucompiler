@@ -1,6 +1,6 @@
 {
   "name": "ucompiler",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Universal assets compiler",
   "main": "lib/main.js",
   "scripts": {
@@ -19,7 +19,7 @@
     "babel-runtime": "^5.8.20",
     "babelify": "^6.1.3",
     "browserify": "latest",
-    "childprocess-promise": "^2.0.1",
+    "childprocess-promise": "^3.0.0",
     "chokidar": "^1.0.5",
     "coffee-script": "latest",
     "js-toolkit": "0.0.4",
