@@ -16,8 +16,8 @@ try {
       process.stdout.write(Output)
     }
   }).catch(function(err){
-    console.log(err)
+    console.error(err)
   })
 } catch(err){
-  console.log(err)
+  console.error(err)
 }
