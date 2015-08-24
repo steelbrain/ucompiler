@@ -14,7 +14,7 @@ class PluginLess extends Base {
         filename: options.internal.file.name,
         sourceMap: options.SourceMap,
         paths: [options.internal.file.directory],
-        compress: options.Compress,
+        compress: options.Uglify,
       }, function(error, output) {
         if (error) reject(error)
         else {
