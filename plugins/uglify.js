@@ -5,7 +5,7 @@ let Uglify
 
 class PluginUglify extends Base {
   compile(contents, options) {
-    if (!options.Uglify && !options.Compress) return contents
+    if (!options.Uglify) return contents
     Uglify = Uglify || require('uglifyjs')
     return Uglify.minify(contents, {fromString: true}).code
   }
