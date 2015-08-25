@@ -11,7 +11,7 @@ class Plugin {
 
     const Me = this
     expressions = expressions.map(function(entry) {
-      return new RegExp('\\s*?' + Me.commentToken + '\\s*?@?(' + entry + ')\\s+(?:"(.*?)"|(.*))', 'gi')
+      return new RegExp(Me.commentToken + '\\s*?@?(' + entry + ')\\s+"(.*?)"', 'gi')
     })
     this.tags.push({
       callback: callback,
@@ -28,16 +28,16 @@ class Plugin {
             let match
             while ((match = entry.exec(contents)) !== null) {
               matches.push(match[0])
-              promises.push(Promise.resolve(value.callback(match[1], match[2] || match[3] || '', options))
-                .then(function(result){ return result || '' })
-              )
+              promises.push(new Promise(function(resolve){
+                resolve(value.callback(match[1], match[2] || '', options))
+              }).then(function(value){
+                  return value || "\n"
+                }))
             }
             return Promise.all(promises).then(function(results) {
-              while (results.length) {
-                const result = results.pop()
-                const matchEntry = matches.pop()
-                contents = contents.replace(matchEntry, result)
-              }
+              contents = contents.replace(entry, function(){
+                return results.shift()
+              })
               return contents
             })
           })

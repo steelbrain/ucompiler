@@ -13,11 +13,12 @@ class GenericPlugin extends Base {
       return new Promise(function(resolve, reject) {
         FS.readFile(value, function (err, data) {
           if (err) return reject(err)
+          data = data.toString('utf8')
 
           const extension = options.internal.file.extension
           if (extension === '.js' || extension === '.coffee') {
-            resolve(';(function(){ ' + data.toString() + ' })();')
-          } else resolve(data.toString())
+            resolve(';(function(){ ' + data + ' })();')
+          } else resolve(data)
         })
       })
     })
