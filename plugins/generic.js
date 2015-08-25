@@ -12,8 +12,12 @@ class GenericPlugin extends Base {
       options.internal.imports.push(value)
       return new Promise(function(resolve, reject) {
         FS.readFile(value, function (err, data) {
-          if (err) reject(err)
-          else resolve(data.toString())
+          if (err) return reject(err)
+
+          const extension = options.internal.file.extension
+          if (extension === '.js' || extension === '.coffee') {
+            resolve(';(function(){ ' + data.toString() + ' })();')
+          } else resolve(data.toString())
         })
       })
     })
