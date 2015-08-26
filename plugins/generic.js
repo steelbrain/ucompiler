@@ -17,7 +17,7 @@ class GenericPlugin extends Base {
 
           const extension = options.internal.file.extension
           if (extension === '.js' || extension === '.coffee') {
-            resolve(';(function(){ ' + data + ' })();')
+            resolve('; ' + data + ' ;')
           } else resolve(data)
         })
       })
