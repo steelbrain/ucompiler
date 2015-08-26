@@ -1,6 +1,7 @@
 'use strict'
 
 const Base = require('./base')
+const Path = require('path')
 let LessJS
 
 class PluginLess extends Base {
@@ -18,7 +19,9 @@ class PluginLess extends Base {
       }, function(error, output) {
         if (error) reject(error)
         else {
-          options.internal.imports = output.imports
+          options.internal.imports = output.imports.map(function(entry){
+            return Path.resolve(options.internal.file.directory, entry)
+          })
           resolve(output.css)
         }
       })
