@@ -15,6 +15,7 @@
     "url": "git+https://github.com/steelbrain/UCompiler.git"
   },
   "dependencies": {
+    "anymatch": "^1.3.0",
     "babel-core": "^5.8.0",
     "babel-runtime": "^5.8.20",
     "babelify": "^6.1.3",
