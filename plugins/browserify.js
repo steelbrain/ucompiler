@@ -12,8 +12,26 @@ class PluginBrowserify extends Base {
     this.registerTag(['Compiler-Browserify'], function(name, value, options) {
       options.Browserify = value === 'true'
     })
+    this.registerTag(['Browserify-Exclude'], function(name, value, options) {
+      options.internal.browserify.excluded.push(value)
+    })
+    this.registerTag(['Browserify-Ignore'], function(name, value, options) {
+      options.internal.browserify.ignored.push(value)
+    })
+    this.registerTag(['Browserify-Exclude'], function(name, value, options) {
+      options.internal.browserify.excluded.push(value)
+    })
+    this.registerTag(['Browserify-Require'], function(name, value, options) {
+      options.internal.browserify.required.push(value)
+    })
   }
   compile(contents, options) {
+    options.internal.browserify = {
+      required: [],
+      excluded: [],
+      ignored: [],
+      external: []
+    }
     return this.executeTags(contents, options).then(function(contents) {
       if (!options.Browserify) return contents
       Browserify = Browserify || require('browserify')
@@ -35,6 +53,18 @@ class PluginBrowserify extends Base {
         })
         browserified = browserified.transform(Babelify)
       }
+      options.internal.browserify.required.forEach(function(file){
+        browserified.require(file)
+      })
+      options.internal.browserify.excluded.forEach(function(file){
+        browserified.exclude(file)
+      })
+      options.internal.browserify.ignored.forEach(function(file){
+        browserified.ignore(file)
+      })
+      options.internal.browserify.external.forEach(function(file){
+        browserified.external(file)
+      })
       return new Promise(function(resolve, reject) {
         browserified.bundle(function(err, buffer) {
           if (err) reject(err)
