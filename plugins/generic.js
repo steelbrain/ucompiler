@@ -28,9 +28,6 @@ class GenericPlugin extends Base {
     this.registerTag(['Compiler-Compress', 'Compiler-Uglify', 'Compiler-Minify'], function(name, value, options) {
       options.Uglify = value === 'true'
     })
-    this.registerTag(['Compiler-Babel', 'Compiler-Transpile'], function(name, value, options) {
-      options.Babel = value === 'true'
-    })
   }
   compile(contents, options) {
     return this.executeTags(contents, options)
