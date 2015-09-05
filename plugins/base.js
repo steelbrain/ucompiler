@@ -3,23 +3,43 @@
 class Plugin {
   constructor() {
     this.tags = []
-    this.commentToken = '\\\/\\\/'
+    this.commentMap = new Map()
+    this.commentMap.set('.css', '\\\/\*')
+    this.commentMap.set('.coffee', '\\#')
+    this.commentMap.set('__default', '\\\/\\\/')
+    this.tagsCache = new Map()
   }
   registerTag(expressions, callback) {
     if (!(expressions instanceof Array)) throw new Error('Invalid Expressions Provided')
     if (typeof callback !== 'function') throw new Error('Invalid Callback Provided')
 
-    const Me = this
     expressions = expressions.map(function(entry) {
-      return new RegExp(Me.commentToken + '\\s*?@?(' + entry + ')\\s+"(.*?)"', 'gi')
+      return '\\s*?@?(' + entry + ')\\s+"(.*?)"'
     })
     this.tags.push({
       callback: callback,
       expressions: expressions,
     })
   }
+  getTags(extension) {
+    if (this.tagsCache.has(extension)) {
+      return this.tagsCache.get(extension)
+    } else {
+      const comment = this.commentMap.has(extension) ? this.commentMap.get(extension) : this.commentMap.get('__default')
+      const tags = this.tags.map(function(tag) {
+        return {
+          callback: tag.callback,
+          expressions: tag.expressions.map(function(expression) {
+            return new RegExp(comment + expression, 'gi')
+          })
+        }
+      })
+      this.tagsCache.set(extension, tags)
+      return tags
+    }
+  }
   executeTags(_, options) {
-    return this.tags.reduce(function(promise, value){
+    return this.getTags(options.internal.file.extension).reduce(function(promise, value){
       return promise.then(function(_){
         return value.expressions.reduce(function(promise, entry){
           return promise.then(function(contents){

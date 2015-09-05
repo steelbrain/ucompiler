@@ -6,15 +6,11 @@ let PostCSS
 class PluginPostCSS extends Base {
   constructor() {
     super()
-    this.commentToken = '\\\/\*'
     this.registerTag(['CSS-Grace'], function(name, value, options) {
       options.CSSGrace = value === 'true'
     })
     this.registerTag(['PostCSS-Plugin'], function(name, value, options) {
       options.internal.postcss.plugins.add(value)
-    })
-    this.registerTag(['Compiler-Compress', 'Compiler-Uglify', 'Compiler-Minify'], function(name, value, options) {
-      options.Uglify = value === 'true'
     })
   }
   compile(contents, options) {
