@@ -74,7 +74,7 @@ class PluginBabelify extends Base {
       debug: options.SourceMap,
       fullPaths: false,
       filename: options.internal.file.path,
-      paths: [Path.join(__dirname, '../node_modules/')]
+      paths: [Path.join(__dirname, '..', 'node_modules'), Path.join(__dirname, 'node_modules')]
     })
     if (options.Babel) {
       Babelify = Babelify || require('babelify').configure({
