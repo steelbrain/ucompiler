@@ -23,9 +23,12 @@
     "childprocess-promise": "^3.0.0",
     "chokidar": "^1.0.5",
     "coffee-script": "latest",
+    "cssgrace": "^2.0.2",
+    "cssnano": "^2.6.1",
     "js-toolkit": "0.0.4",
     "less": "latest",
     "minimist": "latest",
+    "postcss": "^4.1.16",
     "sb-stream-promise": "^0.0.3",
     "uglifyjs": "latest"
   },
