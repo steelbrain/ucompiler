@@ -65,8 +65,8 @@ class Plugin {
       })
     }, Promise.resolve(_))
   }
-  compile(contents) {
-    return contents
+  compile() {
+    throw new Error('Not Implemented')
   }
 }
 
