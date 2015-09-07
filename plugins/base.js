@@ -5,6 +5,7 @@ class Plugin {
     this.tags = []
     this.commentMap = new Map()
     this.commentMap.set('.css', '\\\/\*')
+    this.commentMap.set('.less', '\\\/\*')
     this.commentMap.set('.coffee', '\\#')
     this.commentMap.set('__default', '\\\/\\\/')
     this.tagsCache = new Map()
