@@ -1,6 +1,6 @@
 {
   "name": "ucompiler",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Universal assets compiler",
   "main": "lib/main.js",
   "scripts": {
