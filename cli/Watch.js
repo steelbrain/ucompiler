@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 "use strict"
-let FSWatcher = require('../lib/watcher')
-let Minimist = require('minimist')
-let Options = Minimist(process.argv.slice(2))
-let FS = require('fs')
+const FSWatcher = require('../lib/watcher')
+const Main = require('../lib/main')
+const Minimist = require('minimist')
+const Options = Minimist(process.argv.slice(2))
+const FS = require('fs')
+
 try {
   Options.Blacklist = String(Options.Blacklist || '').split(',').map(function(e) { return e.trim() }).filter(function(e) { return e && e !== 'true' })
   if(!Options['_'].length) throw new Error("Please specify a file/directory to watch")
