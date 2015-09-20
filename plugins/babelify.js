@@ -43,13 +43,13 @@ class PluginBabelify extends Base {
     options.internal.babel = {
       plugins: []
     }
-    return this.executeTags(contents, options).then(function(contents){
+    return this.executeTags(contents, options).then(contents => {
       if (options.Babel && !options.Browserify) {
         return this.compileBabel(contents, options)
       } else if (options.Browserify) {
         return this.compileBrowserify(contents, options)
       } else return contents
-    }.bind(this))
+    })
   }
   compileBabel(contents, options) {
     BabelJS = BabelJS || require('babel-core')
