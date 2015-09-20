@@ -28,7 +28,6 @@
     "less": "latest",
     "minimist": "latest",
     "postcss": "^4.1.16",
-    "sb-stream-promise": "^0.0.3",
     "uglifyjs": "latest"
   },
   "author": "steelbrain",
