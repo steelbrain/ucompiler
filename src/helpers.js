@@ -2,6 +2,7 @@
 
 import FS from 'fs'
 import Path from 'path'
+import Glob from 'glob'
 
 const DEFAULT_CONFIG = {
   plugins: []
@@ -25,6 +26,50 @@ export function findFile(root, fileName) {
     chunks.pop()
   }
   return null
+}
+
+export function scanFiles(path, {root, ignored}) {
+  if (path.indexOf('*') === -1) {
+    // Non-Glob
+    const absPath = Path.isAbsolute(path) ? path : Path.join(path, root)
+    let stat = null
+    try {
+      stat = FS.statSync(absPath)
+    } catch (_) {
+      throw new Error(`Error reading ${absPath}`)
+    }
+    if (stat.isFile()) {
+      return [absPath]
+    } else if (stat.isDirectory()) {
+      let files = []
+      FS.readdirSync(absPath).forEach(function(file) {
+        const absFilePath = Path.join(absPath, file)
+        const relativeFilePath = Path.relative(absPath, absFilePath)
+        if (ignored.indexOf(file) !== -1 || ignored.indexOf(absFilePath) !== -1 ||
+            ignored.indexOf(relativeFilePath) !== -1
+        ) {
+          return
+        }
+        let stat
+        try {
+          stat = FS.lstatSync(absFilePath)
+        } catch (_) {
+          throw new Error(`Error reading ${absFilePath}`)
+        }
+        if (!stat.isSymbolicLink()) {
+          if (stat.isFile()) {
+            files.push(absFilePath)
+          } else if (stat.isDirectory()) {
+            files = files.concat(scanFiles(absFilePath, {root, ignored}))
+          }
+        }
+      })
+      return files
+    } else return []
+  } else {
+    // Glob
+    return Glob.sync(path, {root, ignore: ignored})
+  }
 }
 
 /** Config Helpers */
