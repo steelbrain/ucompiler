@@ -2,12 +2,12 @@
 
 import {readFileSync} from 'fs'
 import Path from 'path'
-import {getConfig, scanFiles, saveFile, findRoot} from './helpers'
+import {getConfig, getRules, scanFiles, saveFile, findRoot} from './helpers'
 import Debug from 'debug'
 
 const debug = Debug('UCompiler:Main')
 
-export function compile(path, options = {}) {
+export function compile(path, options = {}, defaultRules = {}) {
   options.ignored = options.ignored || ['{**/, }node_modules/**', '{**/, }.*']
   options.root = options.root || null
 
@@ -27,33 +27,32 @@ export function compile(path, options = {}) {
     }
   })
 
-  return files.reduce(function(promise, fileRelative) {
+  return Promise.all(files.map(function(relativePath) {
     // TODO (For the future): Reverse source maps when changed
-    return promise.then(function() {
-      const file = Path.join(root, fileRelative)
-      const state = {sourceMap: null}
-      const contents = readFileSync(file, {encoding: 'utf8'})
+    const file = Path.join(root, relativePath)
+    const state = {sourceMap: null, root, relativePath}
+    const rules = getRules({path, state, config, defaultRules})
+    const contents = readFileSync(file, {encoding: 'utf8'})
 
-      return plugins.compilers.reduce(function(promise, plugin) {
-        return promise.then(function(contents) {
-          return plugin.process({contents, file, config, state})
-        })
-      }, Promise.resolve(contents)).then(function(contents) {
-        return plugins.general.reduce(function(promise, plugin) {
-          return promise.then(function(contents) {
-            return plugin.process({contents, file, config, state})
-          })
-        }, Promise.resolve(contents))
-      }).then(function(contents) {
-        return plugins.minifiers.reduce(function(promise, plugin) {
-          return promise.then(function(contents) {
-            return plugin.process({contents, file, config, state})
-          })
-        }, Promise.resolve(contents))
-      }).then(function(contents) {
-        debug(`Processed ${fileRelative}`)
-        return saveFile({contents, file, config})
+    return plugins.compilers.reduce(function(promise, plugin) {
+      return promise.then(function(contents) {
+        return plugin.process({contents, file, config, state, rules})
       })
+    }, Promise.resolve(contents)).then(function(contents) {
+      return plugins.general.reduce(function(promise, plugin) {
+        return promise.then(function(contents) {
+          return plugin.process({contents, file, config, state, rules})
+        })
+      }, Promise.resolve(contents))
+    }).then(function(contents) {
+      return plugins.minifiers.reduce(function(promise, plugin) {
+        return promise.then(function(contents) {
+          return plugin.process({contents, file, config, state, rules})
+        })
+      }, Promise.resolve(contents))
+    }).then(function(contents) {
+      debug(`Processed ${relativePath}`)
+      return saveFile({contents, file, config, state, rules, root})
     })
-  }, Promise.resolve())
+  }))
 }
