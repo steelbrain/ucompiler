@@ -20,10 +20,14 @@ export const DEFAULT_IGNORE = [
 ]
 
 export function compile(path, options = {}, defaultRules = {}) {
-  options.ignored = (options.ignored || []).concat(DEFAULT_IGNORE)
-  options.root = options.root || null
+  options = Object.assign({
+    ignored: [],
+    root: null,
+    defaultRoot: null
+  }, options)
+  options.ignored = options.ignored.concat(DEFAULT_IGNORE)
 
-  const root = findRoot(path, options.root)
+  const root = findRoot(path, options)
   const config = getConfig(root)
   const files = scanFiles(path, {root: root, ignored: options.ignored})
   const plugins = {compilers: [], general: [], minifiers: []}

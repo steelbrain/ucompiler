@@ -35,10 +35,13 @@ export function findFile(root, fileName) {
   return null
 }
 
-export function findRoot(path, root) {
-  if (root !== null) {
-    return root
+export function findRoot(path, options) {
+  if (options.root !== null) {
+    return options.root
   } else if (path.indexOf('*') !== -1) {
+    if (options.defaultRoot) {
+      return options.defaultRoot
+    }
     throw new Error('Options.root must be specified with glob')
   }
   let stat
@@ -63,7 +66,9 @@ export function findRoot(path, root) {
 
   const configFile = findFile(baseDir, '.ucompilerrc')
   if (configFile === null) {
-    return baseDir
+    if (options.defaultRoot) {
+      return options.defaultRoot
+    } else return baseDir
   } else {
     return Path.dirname(configFile)
   }
