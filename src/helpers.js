@@ -3,12 +3,14 @@
 import FS from 'fs'
 import Path from 'path'
 import Minimatch from 'minimatch'
+import {Template} from 'string-templates'
 import Glob from 'glob'
 
 const DEFAULT_CONFIG = {
   plugins: [],
   rules: []
 }
+const template = Template.create()
 
 /** Finding Helpers */
 
@@ -45,17 +47,26 @@ export function findRoot(path, root) {
   } catch (_) {
     throw new Error(`Error reading ${path}`)
   }
-  if (stat.isDirectory()) {
-    return path
-  } else if (stat.isFile()) {
-    const fileDir = Path.dirname(path)
-    const configFile = findFile(fileDir, '.ucompilerrc')
-    if (configFile === null) {
-      return fileDir
-    } else {
-      return Path.dirname(configFile)
-    }
-  } else throw new Error(`${path} is neither a file nor a directory`)
+
+  let baseDir
+
+  switch(true) {
+    case stat.isFile():
+      baseDir = Path.dirname(path)
+      break;
+    case stat.isDirectory():
+      baseDir = path;
+      break;
+    default:
+      throw new Error(`${path} is neither a file nor a directory`)
+  }
+
+  const configFile = findFile(baseDir, '.ucompilerrc')
+  if (configFile === null) {
+    return baseDir
+  } else {
+    return Path.dirname(configFile)
+  }
 }
 
 export function scanFiles(path, {root, ignored}) {
@@ -112,8 +123,32 @@ export function getConfig(root) {
   } else return DEFAULT_CONFIG
 }
 
+export function validateRule({rulePath, path, relativePath}) {
+  if (rulePath.indexOf('*') === -1) {
+    return rulePath === path || rulePath === relativePath ||
+      path.indexOf(rulePath) === 0 || relativePath.indexOf(rulePath) === 0
+  } else {
+    return Minimatch(path, rulePath) || Minimatch(relativePath, rulePath)
+  }
+}
+
+export function getRules({path, config, state, defaultRules}) {
+  const rules = Object.assign({output: '{name}.dist.{ext}'})
+  config.rules.forEach(function(rule) {
+    if (validateRule({rulePath: rule.path, path, relativePath: state.relativePath})) {
+      for (let key in rule) {
+        if (key !== 'path') {
+          rules[key] = rule[key]
+        }
+      }
+    }
+  })
+
+  return rules
+}
+
 /** Saving Helper */
 
-export function saveFile({contents, file, config}) {
-  console.log(contents)
+export function saveFile({contents, file, config, state, rules, root}) {
+
 }
