@@ -1,18 +1,19 @@
 'use babel'
 
-import FS from 'fs'
+import {readFileSync} from 'fs'
 import Path from 'path'
-import {getConfig, scanFiles, saveFile} from './helpers'
+import {getConfig, scanFiles, saveFile, findRoot} from './helpers'
 import Debug from 'debug'
 
-Debug.enable('UCompiler:*')
 const debug = Debug('UCompiler:Main')
 
-export function compile(path, options = {
-  ignored: ['{**/, }node_modules/**', '{**/, }.*']
-}) {
-  const config = getConfig(path)
-  const files = scanFiles(path, {root: config.root, ignored: options.ignored})
+export function compile(path, options = {}) {
+  options.ignored = options.ignored || ['{**/, }node_modules/**', '{**/, }.*']
+  options.root = options.root || null
+
+  const root = findRoot(path, options.root)
+  const config = getConfig(root)
+  const files = scanFiles(path, {root: root, ignored: options.ignored})
   const plugins = {compilers: [], general: [], minifiers: []}
 
   config.plugins.forEach(function(moduleName) {
@@ -29,9 +30,9 @@ export function compile(path, options = {
   return files.reduce(function(promise, fileRelative) {
     // TODO (For the future): Reverse source maps when changed
     return promise.then(function() {
-      const file = Path.join(config.root, fileRelative)
+      const file = Path.join(root, fileRelative)
       const state = {sourceMap: null}
-      const contents = FS.readFileSync(file, {encoding: 'utf8'})
+      const contents = readFileSync(file, {encoding: 'utf8'})
 
       return plugins.compilers.reduce(function(promise, plugin) {
         return promise.then(function(contents) {
@@ -50,7 +51,7 @@ export function compile(path, options = {
           })
         }, Promise.resolve(contents))
       }).then(function(contents) {
-        debug(`Processed ${file}`)
+        debug(`Processed ${fileRelative}`)
         return saveFile({contents, file, config})
       })
     })

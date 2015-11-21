@@ -16,14 +16,14 @@ export function findFile(root, fileName) {
   try {
     FS.accessSync(root, FS.R_OK)
   } catch (_) {
-    throw new Error('Can not read root directory')
+    throw new Error(`Can not read directory ${root}`)
   }
   const chunks = root.split(Path.sep)
-  if (chunks[0] === '') {
-    chunks.shift()
-  }
   while (chunks.length) {
     const filePath = Path.join(chunks.join(Path.sep), fileName)
+    if (filePath === fileName) {
+      break
+    }
     try {
       FS.accessSync(filePath, FS.R_OK)
       return filePath
@@ -31,6 +31,30 @@ export function findFile(root, fileName) {
     chunks.pop()
   }
   return null
+}
+
+export function findRoot(path, root) {
+  if (root !== null) {
+    return root
+  } else if (path.indexOf('*') !== -1) {
+    throw new Error('Options.root must be specified with glob')
+  }
+  let stat
+  try {
+    stat = FS.statSync(path)
+  } catch (_) {
+    throw new Error(`Error reading ${path}`)
+  }
+  if (stat.isDirectory()) {
+    return path
+  } else if (stat.isFile()) {
+    const configFile = findFile(path, '.ucompilerrc')
+    if (configFile === null) {
+      return Path.dirname(path)
+    } else {
+      return Path.dirname(configFile)
+    }
+  } else throw new Error(`${path} is neither a file nor a directory`)
 }
 
 export function scanFiles(path, {root, ignored}) {
@@ -68,39 +92,27 @@ export function scanFiles(path, {root, ignored}) {
     } else return []
   } else {
     // Glob
-    return Glob.sync(path, {root, ignore: ignored})
+    return Glob.sync(path, {cwd: root, ignore: ignored})
   }
 }
 
 /** Config Helper */
 
-export function getConfig(path) {
-  let config
-  let stat
-  let root
-  try {
-    stat = FS.statSync(path)
-  } catch (_) {
-    throw new Error(`Error reading ${path}`)
-  }
-  if (!stat.isFile() && !stat.isDirectory()) {
-    throw new Error(`${path} is neither a file nor a directory`)
-  }
-  root = stat.isFile() ? Path.dirname(path) : path
+export function getConfig(root) {
   const configFile = findFile(root, '.ucompilerrc')
   if (configFile !== null) {
+    let config
     try {
       config = JSON.parse(FS.readFileSync(configFile, {encoding: 'utf8'}))
     } catch (e) {
       throw new Error(`Malformed configuration file located at ${configFile}`)
     }
-    root = Path.dirname(configFile)
-  } else config = {}
-  return Object.assign({root}, DEFAULT_CONFIG, config)
+    return Object.assign({}, DEFAULT_CONFIG, config)
+  } else return DEFAULT_CONFIG
 }
 
 /** Saving Helper */
 
 export function saveFile({contents, file, config}) {
-  console.log(contents)
+  //console.log(contents)
 }
