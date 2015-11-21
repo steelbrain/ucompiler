@@ -20,7 +20,7 @@ Here's an example configuration file
 
 ```json
 {
-  "plugins": ["babel", "css"],
+  "plugins": ["babel", "less"],
   "rules": [
     {
       "path": "src/*",
