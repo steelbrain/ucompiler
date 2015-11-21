@@ -5,7 +5,7 @@ import Path from 'path'
 import {getConfig, getRules, scanFiles, saveFile, findRoot} from './helpers'
 import Debug from 'debug'
 
-const debug = Debug('UCompiler:Main')
+const debugCompile = Debug('UCompiler:Compile')
 
 export function compile(path, options = {}, defaultRules = {}) {
   options.ignored = options.ignored || ['{**/, }node_modules/**', '{**/, }.*']
@@ -51,7 +51,7 @@ export function compile(path, options = {}, defaultRules = {}) {
         })
       }, Promise.resolve(contents))
     }).then(function(contents) {
-      debug(`Processed ${relativePath}`)
+      debugCompile(`Processed ${relativePath}`)
       return saveFile({contents, file, config, state, rules, root})
     })
   }))
