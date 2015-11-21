@@ -150,5 +150,38 @@ export function getRules({path, config, state, defaultRules}) {
 /** Saving Helper */
 
 export function saveFile({contents, file, config, state, rules, root}) {
+  if (rules.output === '-') {
+    process.stdout.write(contents)
+  } else if (rules.output === '--') {
+    return contents
+  } else {
+    const parsed = Path.parse(file)
+    const out = template.render(rules.output, {
+      name: parsed.name,
+      nameWithExt: parsed.name + parsed.ext,
+      ext: parsed.ext.substr(1),
+      root: root,
+      relativePath: state.relativePath,
+      absolutePath: file,
+      dirName: parsed.dir
+    })
 
+    let outputPath
+    if (out.indexOf(Path.sep) === -1) {
+      // Relative to dirName
+      outputPath = Path.join(parsed.dir, out)
+    } else if (Path.isAbsolute(out)) {
+      outputPath = out
+    } else {
+      // Relative to project root
+      outputPath = Path.join(root, out)
+    }
+    return new Promise(function(resolve, reject) {
+      FS.writeFile(outputPath, contents, function(err) {
+        if (err) {
+          reject(err)
+        } else resolve(contents)
+      })
+    })
+  }
 }
