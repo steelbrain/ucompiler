@@ -48,9 +48,10 @@ export function findRoot(path, root) {
   if (stat.isDirectory()) {
     return path
   } else if (stat.isFile()) {
-    const configFile = findFile(path, '.ucompilerrc')
+    const fileDir = Path.dirname(path)
+    const configFile = findFile(fileDir, '.ucompilerrc')
     if (configFile === null) {
-      return Path.dirname(path)
+      return fileDir
     } else {
       return Path.dirname(configFile)
     }
@@ -114,5 +115,5 @@ export function getConfig(root) {
 /** Saving Helper */
 
 export function saveFile({contents, file, config}) {
-  //console.log(contents)
+  console.log(contents)
 }
