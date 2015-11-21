@@ -7,7 +7,9 @@ const DEFAULT_CONFIG = {
   plugins: []
 }
 
-export function findConfigFile(root, configFile = '.urc') {
+/** Finding Helpers */
+
+export function findFile(root, fileName) {
   try {
     FS.accessSync(root, FS.R_OK)
   } catch (_) {
@@ -15,19 +17,21 @@ export function findConfigFile(root, configFile = '.urc') {
   }
   const chunks = root.split(Path.sep)
   while (chunks.length) {
-    const configPath = Path.join(chunks.join(Path.sep), configFile)
+    const filePath = Path.join(chunks.join(Path.sep), fileName)
     try {
-      FS.accessSync(configPath, FS.R_OK)
-      return configPath
+      FS.accessSync(filePath, FS.R_OK)
+      return filePath
     } catch (_) {}
     chunks.pop()
   }
   return null
 }
 
+/** Config Helpers */
+
 export function getConfig(root) {
   let config
-  const configFile = findConfigFile(root)
+  const configFile = findFile(root, '.ucompilerrc')
   if (configFile !== null) {
     try {
       config = JSON.parse(FS.readFileSync(configFile, {encoding: 'utf8'}))
@@ -35,5 +39,5 @@ export function getConfig(root) {
       throw new Error(`Malformed configuration file located at ${configFile}`)
     }
   } else config = {}
-  return Object.assign({}, DEFAULT_CONFIG, config)
+  return Object.assign({root}, DEFAULT_CONFIG, config)
 }
