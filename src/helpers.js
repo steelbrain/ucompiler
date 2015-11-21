@@ -6,7 +6,8 @@ import Minimatch from 'minimatch'
 import Glob from 'glob'
 
 const DEFAULT_CONFIG = {
-  plugins: []
+  plugins: [],
+  rules: []
 }
 
 /** Finding Helpers */
@@ -18,6 +19,9 @@ export function findFile(root, fileName) {
     throw new Error('Can not read root directory')
   }
   const chunks = root.split(Path.sep)
+  if (chunks[0] === '') {
+    chunks.shift()
+  }
   while (chunks.length) {
     const filePath = Path.join(chunks.join(Path.sep), fileName)
     try {
@@ -33,12 +37,7 @@ export function scanFiles(path, {root, ignored}) {
   if (path.indexOf('*') === -1) {
     // Non-Glob
     const absPath = Path.isAbsolute(path) ? path : Path.join(path, root)
-    let stat = null
-    try {
-      stat = FS.statSync(absPath)
-    } catch (_) {
-      throw new Error(`Error reading ${absPath}`)
-    }
+    const stat = FS.statSync(absPath)
     if (stat.isFile()) {
       return [absPath]
     } else if (stat.isDirectory()) {
@@ -73,10 +72,21 @@ export function scanFiles(path, {root, ignored}) {
   }
 }
 
-/** Config Helpers */
+/** Config Helper */
 
-export function getConfig(root) {
+export function getConfig(path) {
   let config
+  let stat
+  let root
+  try {
+    stat = FS.statSync(path)
+  } catch (_) {
+    throw new Error(`Error reading ${path}`)
+  }
+  if (!stat.isFile() && !stat.isDirectory()) {
+    throw new Error(`${path} is neither a file nor a directory`)
+  }
+  root = stat.isFile() ? Path.dirname(path) : path
   const configFile = findFile(root, '.ucompilerrc')
   if (configFile !== null) {
     try {
@@ -84,6 +94,13 @@ export function getConfig(root) {
     } catch (e) {
       throw new Error(`Malformed configuration file located at ${configFile}`)
     }
+    root = Path.dirname(configFile)
   } else config = {}
   return Object.assign({root}, DEFAULT_CONFIG, config)
+}
+
+/** Saving Helper */
+
+export function saveFile({contents, file, config}) {
+  console.log(contents)
 }
