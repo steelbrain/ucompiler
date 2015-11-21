@@ -1,3 +1,9 @@
 {
-  "plugins": ["babel"]
+  "plugins": ["babel"],
+  "rules": [
+    {
+      "path": "src/*",
+      "output": "lib/{name}.js"
+    }
+  ]
 }
