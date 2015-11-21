@@ -6,9 +6,21 @@ import {getConfig, getRules, scanFiles, saveFile, findRoot} from './helpers'
 import Debug from 'debug'
 
 const debugCompile = Debug('UCompiler:Compile')
+export const DEFAULT_IGNORE = [
+  'node_modules/**',
+  'bower_components/**',
+  'coverage/**',
+  '{tmp,temp}/**',
+  '**/*.min.js',
+  '**/bundle.js',
+  'fixture{-*,}.{js,jsx}',
+  '{test/,}fixture{s,}/**',
+  'vendor/**',
+  'dist/**'
+]
 
 export function compile(path, options = {}, defaultRules = {}) {
-  options.ignored = options.ignored || ['{**/, }node_modules/**', '{**/, }.*']
+  options.ignored = (options.ignored || []).concat(DEFAULT_IGNORE)
   options.root = options.root || null
 
   const root = findRoot(path, options.root)
