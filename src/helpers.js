@@ -2,6 +2,7 @@
 
 import FS from 'fs'
 import Path from 'path'
+import Minimatch from 'minimatch'
 import Glob from 'glob'
 
 const DEFAULT_CONFIG = {
@@ -44,10 +45,10 @@ export function scanFiles(path, {root, ignored}) {
       let files = []
       FS.readdirSync(absPath).forEach(function(file) {
         const absFilePath = Path.join(absPath, file)
-        const relativeFilePath = Path.relative(absPath, absFilePath)
-        if (ignored.indexOf(file) !== -1 || ignored.indexOf(absFilePath) !== -1 ||
-            ignored.indexOf(relativeFilePath) !== -1
-        ) {
+        const relativeFilePath = Path.relative(root, absFilePath)
+        if (ignored.some(function(ignored) {
+            return Minimatch(relativeFilePath, ignored)
+          })) {
           return
         }
         let stat
@@ -58,7 +59,7 @@ export function scanFiles(path, {root, ignored}) {
         }
         if (!stat.isSymbolicLink()) {
           if (stat.isFile()) {
-            files.push(absFilePath)
+            files.push(relativeFilePath)
           } else if (stat.isDirectory()) {
             files = files.concat(scanFiles(absFilePath, {root, ignored}))
           }
