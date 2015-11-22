@@ -6,12 +6,28 @@ import {getConfig, getRules, scanFiles, saveFile, findRoot} from './helpers'
 import Debug from 'debug'
 
 const debugCompile = Debug('UCompiler:Compile')
+export const DEFAULT_IGNORE = [
+  '{**/, }node_modules/**',
+  '{**/, }bower_components/**',
+  '{**/, }coverage/**',
+  '{**/, }{tmp,temp}/**',
+  '{**/, }*.min.js',
+  '{**/, }/bundle.js',
+  '{**/, }fixture{-*,}.{js,jsx}',
+  '{**/, }{test/,}fixture{s,}/**',
+  '{**/, }vendor/**',
+  '{**/, }dist/**'
+]
 
 export function compile(path, options = {}, defaultRules = {}) {
-  options.ignored = options.ignored || ['{**/, }node_modules/**', '{**/, }.*']
-  options.root = options.root || null
+  options = Object.assign({
+    ignored: [],
+    root: null,
+    defaultRoot: null
+  }, options)
+  options.ignored = options.ignored.concat(DEFAULT_IGNORE)
 
-  const root = findRoot(path, options.root)
+  const root = findRoot(path, options)
   const config = getConfig(root)
   const files = scanFiles(path, {root: root, ignored: options.ignored})
   const plugins = {compilers: [], general: [], minifiers: []}
@@ -30,9 +46,10 @@ export function compile(path, options = {}, defaultRules = {}) {
   return Promise.all(files.map(function(relativePath) {
     // TODO (For the future): Reverse source maps when changed
     const file = Path.join(root, relativePath)
-    const state = {sourceMap: null, root, relativePath}
+    const state = {sourceMap: null, root, relativePath, imports: []}
     const rules = getRules({path, state, config, defaultRules})
     const contents = readFileSync(file, {encoding: 'utf8'})
+    const initialContents = contents
 
     return plugins.compilers.reduce(function(promise, plugin) {
       return promise.then(function(contents) {
@@ -52,7 +69,11 @@ export function compile(path, options = {}, defaultRules = {}) {
       }, Promise.resolve(contents))
     }).then(function(contents) {
       debugCompile(`Processed ${relativePath}`)
-      return saveFile({contents, file, config, state, rules, root})
+      if (initialContents !== contents) {
+        return saveFile({contents, file, config, state, rules, root})
+      } else {
+        return contents
+      }
     })
   }))
 }

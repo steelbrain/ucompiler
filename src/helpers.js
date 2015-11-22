@@ -35,10 +35,13 @@ export function findFile(root, fileName) {
   return null
 }
 
-export function findRoot(path, root) {
-  if (root !== null) {
-    return root
+export function findRoot(path, options) {
+  if (options.root !== null) {
+    return options.root
   } else if (path.indexOf('*') !== -1) {
+    if (options.defaultRoot) {
+      return options.defaultRoot
+    }
     throw new Error('Options.root must be specified with glob')
   }
   let stat
@@ -63,7 +66,9 @@ export function findRoot(path, root) {
 
   const configFile = findFile(baseDir, '.ucompilerrc')
   if (configFile === null) {
-    return baseDir
+    if (options.defaultRoot) {
+      return options.defaultRoot
+    } else return baseDir
   } else {
     return Path.dirname(configFile)
   }
@@ -72,13 +77,17 @@ export function findRoot(path, root) {
 export function scanFiles(path, {root, ignored}) {
   if (path.indexOf('*') === -1) {
     // Non-Glob
-    const absPath = Path.isAbsolute(path) ? path : Path.join(path, root)
+    const absPath = Path.isAbsolute(path) ? path : Path.join(root, path)
     const stat = FS.statSync(absPath)
     if (stat.isFile()) {
-      return [absPath]
+      return [Path.relative(root, absPath)]
     } else if (stat.isDirectory()) {
       let files = []
       FS.readdirSync(absPath).forEach(function(file) {
+        if (file.substr(0, 1) === '.') {
+          return // Ignore dot files
+        }
+
         const absFilePath = Path.join(absPath, file)
         const relativeFilePath = Path.relative(root, absFilePath)
         if (ignored.some(function(ignored) {
@@ -104,7 +113,7 @@ export function scanFiles(path, {root, ignored}) {
     } else return []
   } else {
     // Glob
-    return Glob.sync(path, {cwd: root, ignore: ignored})
+    return Glob.sync(path, {cwd: root, ignore: ignored, nodir: true})
   }
 }
 

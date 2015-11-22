@@ -4,8 +4,7 @@
   "description": "Universal assets compiler",
   "main": "lib/main.js",
   "bin": {
-    "ucompile": "./cli/compile.js",
-    "uwatch": "./cli/watch.js"
+    "ucompiler": "./cli/main.js"
   },
   "repository": {
     "type": "git",
@@ -20,7 +19,8 @@
   "dependencies": {
     "debug": "^2.2.0",
     "glob": "^6.0.1",
-    "minimatch": "^3.0.0"
+    "minimatch": "^3.0.0",
+    "string-templates": "^1.0.0"
   },
   "devDependencies": {
     "babel-preset-steelbrain": "^1.0.0"
