@@ -46,7 +46,7 @@ export function compile(path, options = {}, defaultRules = {}) {
   return Promise.all(files.map(function(relativePath) {
     // TODO (For the future): Reverse source maps when changed
     const file = Path.join(root, relativePath)
-    const state = {sourceMap: null, root, relativePath}
+    const state = {sourceMap: null, root, relativePath, imports: []}
     const rules = getRules({path, state, config, defaultRules})
     const contents = readFileSync(file, {encoding: 'utf8'})
     const initialContents = contents
