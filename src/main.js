@@ -7,16 +7,16 @@ import Debug from 'debug'
 
 const debugCompile = Debug('UCompiler:Compile')
 export const DEFAULT_IGNORE = [
-  'node_modules/**',
-  'bower_components/**',
-  'coverage/**',
-  '{tmp,temp}/**',
-  '**/*.min.js',
-  '**/bundle.js',
-  'fixture{-*,}.{js,jsx}',
-  '{test/,}fixture{s,}/**',
-  'vendor/**',
-  'dist/**'
+  '{**/, }node_modules/**',
+  '{**/, }bower_components/**',
+  '{**/, }coverage/**',
+  '{**/, }{tmp,temp}/**',
+  '{**/, }*.min.js',
+  '{**/, }/bundle.js',
+  '{**/, }fixture{-*,}.{js,jsx}',
+  '{**/, }{test/,}fixture{s,}/**',
+  '{**/, }vendor/**',
+  '{**/, }dist/**'
 ]
 
 export function compile(path, options = {}, defaultRules = {}) {
