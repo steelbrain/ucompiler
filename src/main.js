@@ -49,6 +49,7 @@ export function compile(path, options = {}, defaultRules = {}) {
     const state = {sourceMap: null, root, relativePath}
     const rules = getRules({path, state, config, defaultRules})
     const contents = readFileSync(file, {encoding: 'utf8'})
+    const initialContents = contents
 
     return plugins.compilers.reduce(function(promise, plugin) {
       return promise.then(function(contents) {
@@ -68,7 +69,11 @@ export function compile(path, options = {}, defaultRules = {}) {
       }, Promise.resolve(contents))
     }).then(function(contents) {
       debugCompile(`Processed ${relativePath}`)
-      return saveFile({contents, file, config, state, rules, root})
+      if (initialContents !== contents) {
+        return saveFile({contents, file, config, state, rules, root})
+      } else {
+        return contents
+      }
     })
   }))
 }
