@@ -77,7 +77,7 @@ export function findRoot(path, options) {
 export function scanFiles(path, {root, ignored}) {
   if (path.indexOf('*') === -1) {
     // Non-Glob
-    const absPath = Path.isAbsolute(path) ? path : Path.join(path, root)
+    const absPath = Path.isAbsolute(path) ? path : Path.join(root, path)
     const stat = FS.statSync(absPath)
     if (stat.isFile()) {
       return [absPath]
