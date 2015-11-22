@@ -68,10 +68,11 @@ export function compile(path, options = {}, defaultRules = {}) {
         })
       }, Promise.resolve(contents))
     }).then(function(contents) {
-      debugCompile(`Processed ${relativePath}`)
       if (initialContents !== contents) {
+        debugCompile(`Processed ${relativePath}`)
         return saveFile({contents, file, config, state, rules, root})
       } else {
+        debugCompile(`Ignored ${relativePath}`)
         return contents
       }
     })
