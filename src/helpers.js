@@ -80,7 +80,7 @@ export function scanFiles(path, {root, ignored}) {
     const absPath = Path.isAbsolute(path) ? path : Path.join(root, path)
     const stat = FS.statSync(absPath)
     if (stat.isFile()) {
-      return [absPath]
+      return [Path.relative(root, absPath)]
     } else if (stat.isDirectory()) {
       let files = []
       FS.readdirSync(absPath).forEach(function(file) {
