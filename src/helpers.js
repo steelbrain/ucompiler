@@ -113,7 +113,7 @@ export function scanFiles(path, {root, ignored}) {
     } else return []
   } else {
     // Glob
-    return Glob.sync(path, {cwd: root, ignore: ignored})
+    return Glob.sync(path, {cwd: root, ignore: ignored, nodir: true})
   }
 }
 
