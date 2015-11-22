@@ -84,6 +84,10 @@ export function scanFiles(path, {root, ignored}) {
     } else if (stat.isDirectory()) {
       let files = []
       FS.readdirSync(absPath).forEach(function(file) {
+        if (file.substr(0, 1) === '.') {
+          return // Ignore dot files
+        }
+
         const absFilePath = Path.join(absPath, file)
         const relativeFilePath = Path.relative(root, absFilePath)
         if (ignored.some(function(ignored) {
