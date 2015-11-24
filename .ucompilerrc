@@ -1,9 +1,10 @@
 {
-  "plugins": ["babel"],
   "rules": [
     {
-      "path": "src/*",
-      "output": "lib/{name}.js"
+      "path": "src/**/*.js",
+      "outputPath": "lib/{relativeDir}{name}.js",
+      "outputPathTrim": "src/",
+      "plugins": ["babel"]
     }
   ]
 }
