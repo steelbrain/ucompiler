@@ -10,7 +10,9 @@ import {isIgnored} from './common'
 export function findFiles(pathGiven, ignoredGiven, options) {
   const ignored = DEFAULT_IGNORED.concat(ignoredGiven)
 
-  if (isGlob(pathGiven)) {
+  if (pathGiven === null) {
+    throw new Error('Default files are not supported yet')
+  } else if (isGlob(pathGiven)) {
     return findFilesGlob(pathGiven, ignored, options)
   } else {
     const path = Path.isAbsolute(pathGiven) ? pathGiven : Path.join(options.root, pathGiven)
@@ -29,7 +31,6 @@ export function findFiles(pathGiven, ignoredGiven, options) {
 export function findFilesBase(path, ignored, {root, config}, validateCallback) {
   let files = []
 
-  // TODO: Only include files that are used in config
   FS.readdirSync(path).forEach(function(entryName) {
     const absolutePath = Path.join(path, entryName)
     const relativePath = Path.relative(root, absolutePath)
