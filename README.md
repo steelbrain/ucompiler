@@ -28,7 +28,7 @@ Here's an example configuration file
     },
     {
       "path": "assets/less/*",
-      "output": "assets/css/{name.css}"
+      "output": "assets/css/{name}.css"
     }
   ]
 }
