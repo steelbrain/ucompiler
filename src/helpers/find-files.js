@@ -7,19 +7,19 @@ import isGlob from 'is-glob'
 import {DEFAULT_IGNORED} from '../defaults'
 import {isIgnored} from './common'
 
-export function findFiles(pathGiven, ignoredGiven, state) {
+export function findFiles(pathGiven, ignoredGiven, options) {
   const ignored = DEFAULT_IGNORED.concat(ignoredGiven)
 
   if (isGlob(pathGiven)) {
-    return findFilesGlob(pathGiven, ignored, state)
+    return findFilesGlob(pathGiven, ignored, options)
   } else {
-    const path = Path.isAbsolute(pathGiven) ? pathGiven : Path.join(state.root, pathGiven)
+    const path = Path.isAbsolute(pathGiven) ? pathGiven : Path.join(options.root, pathGiven)
     const stat = FS.statSync(path)
 
     if (stat.isFile()) {
-      return [Path.relative(state.root, path)]
+      return [Path.relative(options.root, path)]
     } else if (stat.isDirectory()) {
-      return findFilesRegular(path, ignored, state)
+      return findFilesRegular(path, ignored, options)
     } else {
       throw new Error(`${path} is neither a file nor a directory`)
     }
@@ -31,23 +31,21 @@ export function findFilesBase(path, ignored, {root, config}, validateCallback) {
 
   // TODO: Only include files that are used in config
   FS.readdirSync(path).forEach(function(entryName) {
-    const paths = {}
-    paths.absolute = Path.join(path, entryName)
-    paths.relative = Path.relative(root, paths.absolute)
-    paths.name = entryName
-    const stat = FS.lstatSync(paths.absolute)
+    const absolutePath = Path.join(path, entryName)
+    const relativePath = Path.relative(root, absolutePath)
+    const stat = FS.lstatSync(absolutePath)
 
     if (entryName.substr(0, 1) === '.' ||
         stat.isSymbolicLink() ||
-        isIgnored(paths.name, paths.relative, ignored)) {
+        isIgnored(entryName, relativePath, ignored)) {
       return
     }
 
-    if (validateCallback === null || validateCallback(paths, stat)) {
+    if (validateCallback === null || validateCallback(relativePath, stat)) {
       if (stat.isDirectory()) {
-        files = files.concat(findFilesBase(paths.absolute, ignored, {root, config}, validateCallback))
+        files = files.concat(findFilesBase(absolutePath, ignored, {root, config}, validateCallback))
       } else if (stat.isFile()) {
-        files.push(paths.relative)
+        files.push({relativePath, absolutePath})
       }
     }
   })
@@ -60,10 +58,7 @@ export function findFilesRegular(path, ignored, {root, config}) {
 }
 
 export function findFilesGlob(path, ignored, {root, config}) {
-  return findFilesBase(root, ignored, {root, config}, function({absolute, relative, name}, stat) {
-    if (stat.isDirectory()) {
-      return true
-    }
-    return Minimatch(relative, path)
+  return findFilesBase(root, ignored, {root, config}, function(relative, stat) {
+    return stat.isDirectory() || Minimatch(relative, path)
   })
 }
