@@ -52,7 +52,7 @@ ToDo: Write rest of it
 The plugin package names must be in `ucompiler-plugin-{name}` format. While using them in `.ucompilerrc`, you can only use the name.
 UCompiler expects the plugin to export an object like the one shown below. It's process method will be invoked for the files using that plugin.
 
-```
+```js
 module.exports = {
   compiler: false,
   minifier: false,
