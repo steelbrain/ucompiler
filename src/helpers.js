@@ -3,14 +3,8 @@
 import FS from 'fs'
 import Path from 'path'
 import Minimatch from 'minimatch'
-import {Template} from 'string-templates'
 import Glob from 'glob'
-
-const DEFAULT_CONFIG = {
-  plugins: [],
-  rules: []
-}
-const template = Template.create()
+import {DEFAULT_CONFIG, template} from './defaults'
 
 /** Finding Helpers */
 

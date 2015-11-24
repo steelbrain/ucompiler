@@ -1,23 +1,12 @@
 'use babel'
 
-import {readFileSync} from 'fs'
 import Path from 'path'
-import {getConfig, getRules, scanFiles, saveFile, findRoot} from './helpers'
 import Debug from 'debug'
+import {readFileSync} from 'fs'
+import {getConfig, getRules, scanFiles, saveFile, findRoot} from './helpers'
+import {DEFAULT_IGNORED} from './defaults'
 
 const debugCompile = Debug('UCompiler:Compile')
-export const DEFAULT_IGNORE = [
-  '{**/, }node_modules/**',
-  '{**/, }bower_components/**',
-  '{**/, }coverage/**',
-  '{**/, }{tmp,temp}/**',
-  '{**/, }*.min.js',
-  '{**/, }/bundle.js',
-  '{**/, }fixture{-*,}.{js,jsx}',
-  '{**/, }{test/,}fixture{s,}/**',
-  '{**/, }vendor/**',
-  '{**/, }dist/**'
-]
 
 export function compile(path, options = {}, defaultRules = {}) {
   options = Object.assign({
@@ -25,7 +14,7 @@ export function compile(path, options = {}, defaultRules = {}) {
     root: null,
     defaultRoot: null
   }, options)
-  options.ignored = options.ignored.concat(DEFAULT_IGNORE)
+  options.ignored = options.ignored.concat(DEFAULT_IGNORED)
 
   const root = findRoot(path, options)
   const config = getConfig(root)

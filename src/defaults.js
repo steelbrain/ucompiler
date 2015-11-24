@@ -1,5 +1,7 @@
 'use babel'
 
+import {Template} from 'string-templates'
+
 export const DEFAULT_IGNORED = [
   'node_modules',
   'bower_components',
@@ -15,3 +17,10 @@ export const DEFAULT_IGNORED = [
   'vendor',
   'dist'
 ]
+
+export const DEFAULT_CONFIG = {
+  plugins: [],
+  rules: []
+}
+
+export const template = Template.create()
