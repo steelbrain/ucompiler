@@ -2,6 +2,8 @@
 
 import {Template} from 'string-templates'
 
+export const CONFIG_FILE_NAME = '.ucompilerrc'
+
 export const DEFAULT_IGNORED = [
   'node_modules',
   'bower_components',
