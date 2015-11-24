@@ -21,7 +21,7 @@ export const DEFAULT_IGNORED = [
 ]
 
 export const DEFAULT_CONFIG = {
-  output: '{name}.dist.{ext}',
+  outputPath: '{name}.dist.{ext}',
   plugins: [],
   rules: []
 }
