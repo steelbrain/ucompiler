@@ -12,7 +12,6 @@ if (!parameters.length || knownCommands.indexOf(parameters[0]) === -1) {
 }
 
 if (parameters[0] === 'go') {
-  // TODO: Compile only those by default that are in rules
   UCompiler.compile(parameters[1] || null, {cwd: process.cwd()}).catch(function(e) {
     console.error(e)
     process.exit(1)
