@@ -45,7 +45,7 @@ export function findFilesBase(path, ignored, {root, config}, validateCallback) {
       if (stat.isDirectory()) {
         files = files.concat(findFilesBase(absolutePath, ignored, {root, config}, validateCallback))
       } else if (stat.isFile()) {
-        files.push({relativePath, absolutePath})
+        files.push({relativePath, absolutePath, fileName: entryName})
       }
     }
   })
