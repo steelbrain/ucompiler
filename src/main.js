@@ -1,27 +1,36 @@
 'use babel'
 
+import FS from 'fs'
 import {findRoot} from './helpers/find-root'
-import {getConfig} from './helpers/get-config'
 import {findFiles} from './helpers/find-files'
-import Util from 'util'
+import {getConfig} from './helpers/get-config'
+import {getRules} from './helpers/get-rules'
+import {getPlugins} from './helpers/get-plugins'
+import {saveFile} from './helpers/save-file'
+import {execute} from './helpers/execute'
 
-export function compile(path, givenOptions = {}) {
+export function compile(path = null, givenOptions = {}) {
   const options = Object.assign({
     ignored: [],
     root: null,
     cwd: null,
-    rules: {}
+    config: {}
   }, givenOptions)
 
   const root = findRoot(path, options)
-  const config = getConfig(root)
-  const state = {
-    root: root,
-    config: config
-  }
-  const files = findFiles(path, options.ignored, state)
+  const config = Object.assign({}, options.config, getConfig(root))
+  const files = findFiles(path, options.ignored, {root, config})
 
-  console.log(files)
+  return Promise.all(files.map(function({relativePath, absolutePath, fileName}) {
+    // TODO: Reverse source maps when they change
+    const localConfig = getRules(relativePath, config)
+    const plugins = getPlugins(localConfig)
+    const contents = FS.readFileSync(absolutePath, {encoding: 'utf8'})
+    const state = {sourceMap: null, imports: []}
+    const paths = {root, relativePath, absolutePath, fileName}
+
+    return execute(plugins, contents, paths, {state, config: localConfig}).then(function(newContents) {
+      return saveFile(contents, localConfig, paths)
+    })
+  }))
 }
-
-compile('src/helpers', {cwd: process.cwd()})
