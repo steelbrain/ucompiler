@@ -24,11 +24,16 @@ Here's an example configuration file
   "rules": [
     {
       "path": "src/*",
-      "output": "lib/{name}.js"
+      "outputPath": "lib/{name}.js"
     },
     {
       "path": "assets/less/*",
-      "output": "assets/css/{name.css}"
+      "outputPath": "assets/css/{name}.css"
+    },
+    {
+      "path": "myapp/**/*.js",
+      "outputPath": "myapp-compiled/{relativeDir}{name}.js",
+      "outputPathTrim": "myapp"
     }
   ]
 }
@@ -41,6 +46,19 @@ The UCompiler CLI comes with two commands, `watch` and `go`.
 `watch` Watches the file or folder provided and compiles them on change
 
 ToDo: Write rest of it
+
+#### Plugin API
+
+The plugin package names must be in `ucompiler-plugin-{name}` format. While using them in `.ucompilerrc`, you can only use the name.
+UCompiler expects the plugin to export an object like the one shown below. It's process method will be invoked for the files using that plugin.
+
+```
+module.exports = {
+  compiler: false,
+  minifier: false,
+  process: function(contents, {root, relativePath, absolutePath, fileName}, {state, config}): String | Promise<String>
+}
+```
 
 #### License
 
