@@ -30,7 +30,7 @@ export function compile(path = null, givenOptions = {}) {
     const paths = {root, relativePath, absolutePath, fileName}
 
     return execute(plugins, contents, paths, {state, config: localConfig}).then(function(newContents) {
-      return saveFile(contents, localConfig, paths)
+      return saveFile(newContents, localConfig, paths)
     })
   }))
 }

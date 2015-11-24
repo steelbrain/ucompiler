@@ -4,7 +4,10 @@
       "path": "src/**/*.js",
       "outputPath": "lib/{relativeDir}{name}.js",
       "outputPathTrim": "src/",
-      "plugins": ["babel"]
+      "plugins": ["babel"],
+      "babel": {
+        "presets": ["steelbrain"]
+      }
     }
   ]
 }
