@@ -42,6 +42,19 @@ The UCompiler CLI comes with two commands, `watch` and `go`.
 
 ToDo: Write rest of it
 
+#### Plugin API
+
+The plugin package names must be in `ucompiler-plugin-{name}` format. While using them in `.ucompilerrc`, you can only use the name.
+UCompiler expects the plugin to export an object like the one shown below. It's process method will be invoked for the files using that plugin.
+
+```
+module.exports = {
+  compiler: false,
+  minifier: false,
+  process: function(contents, {root, relativePath, absolutePath, fileName}, {state, config}): String | Promise<String>
+}
+```
+
 #### License
 
 This project is licensed under the terms of MIT License. See the LICENSE file for more info.
