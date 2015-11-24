@@ -11,7 +11,7 @@ export function findFiles(pathGiven, ignoredGiven, options) {
   const ignored = DEFAULT_IGNORED.concat(ignoredGiven)
 
   if (pathGiven === null) {
-    throw new Error('Default files are not supported yet')
+    return findFilesConfig(ignored, options)
   } else if (isGlob(pathGiven)) {
     return findFilesGlob(pathGiven, ignored, options)
   } else {
@@ -42,7 +42,7 @@ export function findFilesBase(path, ignored, {root, config}, validateCallback) {
       return
     }
 
-    if (validateCallback === null || validateCallback(relativePath, stat)) {
+    if (validateCallback === null || validateCallback(relativePath, entryName, stat)) {
       if (stat.isDirectory()) {
         files = files.concat(findFilesBase(absolutePath, ignored, {root, config}, validateCallback))
       } else if (stat.isFile()) {
@@ -59,7 +59,17 @@ export function findFilesRegular(path, ignored, {root, config}) {
 }
 
 export function findFilesGlob(path, ignored, {root, config}) {
-  return findFilesBase(root, ignored, {root, config}, function(relative, stat) {
+  return findFilesBase(root, ignored, {root, config}, function(relative, _, stat) {
     return stat.isDirectory() || Minimatch(relative, path)
+  })
+}
+
+export function findFilesConfig(ignored, {root, config}) {
+  const paths = []
+  config.rules.forEach(function(rule) {
+    paths.push(rule.path)
+  })
+  return findFilesBase(root, ignored, {root, config}, function(relativePath, fileName, stat) {
+    return stat.isDirectory() || isIgnored(fileName, relativePath, paths)
   })
 }
