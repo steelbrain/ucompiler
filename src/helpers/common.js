@@ -2,6 +2,8 @@
 
 import Path from 'path'
 import FS from 'fs'
+import isGlob from 'is-glob'
+import Minimatch from 'minimatch'
 
 export function getDir(path) {
   let stat
@@ -44,4 +46,17 @@ export function findFile(root, fileName) {
     chunks.pop()
   }
   return null
+}
+
+export function isIgnored(name, path, ignored) {
+  if (name.substr(0, 1) === '.') {
+    return true
+  }
+  return ignored.some(function(entry) {
+    if (isGlob(entry)) {
+      return Minimatch(name, entry) || Minimatch(path, entry)
+    } else {
+      return name === entry || path === entry
+    }
+  })
 }
