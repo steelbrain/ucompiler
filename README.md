@@ -24,11 +24,16 @@ Here's an example configuration file
   "rules": [
     {
       "path": "src/*",
-      "output": "lib/{name}.js"
+      "outputPath": "lib/{name}.js"
     },
     {
       "path": "assets/less/*",
-      "output": "assets/css/{name}.css"
+      "outputPath": "assets/css/{name}.css"
+    },
+    {
+      "path": "myapp/**/*.js",
+      "outputPath": "myapp-compiled/{relativeDir}{name}.js",
+      "outputPathTrim": "myapp"
     }
   ]
 }
