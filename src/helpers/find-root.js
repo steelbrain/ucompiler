@@ -10,7 +10,10 @@ export function findRoot(path, options) {
     return options.root
   }
 
-  const searchPath = getDir(isGlob(path) ? options.cwd : path)
+  let searchPath = getDir(isGlob(path) ? options.cwd : path)
+  if (!Path.isAbsolute(searchPath)) {
+    searchPath = Path.join(options.cwd, searchPath)
+  }
   const configFile = findFile(searchPath, CONFIG_FILE_NAME)
 
   if (configFile === null) {
