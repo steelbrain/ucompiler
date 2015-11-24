@@ -1,6 +1,6 @@
 'use babel'
 
-export function execute({plugins, contents}) {
+export function execute(plugins, contents, paths, meta) {
   // Sequence:
   // 1. Compilers
   // 2. General
@@ -11,7 +11,7 @@ export function execute({plugins, contents}) {
     .concat(plugins.minifiers)
     .reduce(function(promise, plugin) {
       return promise.then(function(contents) {
-        return plugin.process({contents})
+        return plugin.process(contents, paths, meta)
       })
     }, Promise.resolve(contents))
 }
