@@ -5,16 +5,22 @@ import {getDir, findFile} from './common'
 import {CONFIG_FILE_NAME} from '../defaults'
 import isGlob from 'is-glob'
 
+const ERROR_MESSAGE = 'Either of options.cwd or options.root is required'
+
 export function findRoot(path, options) {
   if (options.root !== null) {
     return options.root
+  } else if (path === null) {
+    if (options.cwd === null) {
+      throw new Error(ERROR_MESSAGE)
+    } else return options.cwd
   }
 
   const isglob = isGlob(path)
   const isabsolute = !isglob && Path.isAbsolute(path)
 
   if (!isabsolute && options.cwd === null) {
-    throw new Error('Either of options.cwd or options.root is required')
+    throw new Error(ERROR_MESSAGE)
   }
 
   let searchPath = getDir(isglob ? options.cwd : path)
