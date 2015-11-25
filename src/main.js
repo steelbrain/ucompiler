@@ -1,5 +1,6 @@
 'use babel'
 
+import Path from 'path'
 import FS from 'fs'
 import {findRoot} from './helpers/find-root'
 import {findFiles} from './helpers/find-files'
@@ -26,11 +27,11 @@ export function compile(path = null, givenOptions = {}) {
     const localConfig = getRules(relativePath, config)
     const plugins = getPlugins(root, localConfig)
     const contents = FS.readFileSync(absolutePath, {encoding: 'utf8'})
-    const state = {sourceMap: null, imports: []}
+    const state = {sourceMap: null, imports: [], ext: Path.extname(fileName).slice(1)}
     const paths = {root, relativePath, absolutePath, fileName}
 
     return execute(plugins, contents, paths, {state, config: localConfig}).then(function(newContents) {
-      return saveFile(newContents, localConfig, paths)
+      return saveFile(newContents, localConfig, paths, state)
     })
   }))
 }

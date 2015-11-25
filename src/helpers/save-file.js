@@ -4,7 +4,7 @@ import FS from 'fs'
 import Path from 'path'
 import {template} from '../defaults'
 
-export function saveFile(contents, config, {root, relativePath, absolutePath, fileName}) {
+export function saveFile(contents, config, {root, relativePath, absolutePath}, state) {
   const output = config.outputPath
 
   if (output === '-') {
@@ -25,7 +25,8 @@ export function saveFile(contents, config, {root, relativePath, absolutePath, fi
       relativePath: relativePath,
       relativeDir: relativeDir + Path.sep,
       absolutePath: absolutePath,
-      absoluteDir: absoluteDir + Path.sep
+      absoluteDir: absoluteDir + Path.sep,
+      state: state
     })
 
     if (config.outputPathTrim) {
