@@ -12,7 +12,7 @@ export function getRules(relativePath, config) {
     if (value && value instanceof Array) {
       localConfig[key] = value.slice()
     } else if (typeof value === 'object') {
-      localConfig[key] = Object.create(value)
+      localConfig[key] = Object.assign({}, value)
     } else {
       localConfig[key] = value
     }
