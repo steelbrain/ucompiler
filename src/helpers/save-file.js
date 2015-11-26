@@ -14,7 +14,7 @@ export function saveFile(contents, config, {root, relativePath, absolutePath}, s
     return contents
   } else {
     const parsed = Path.parse(absolutePath)
-    const absoluteDir = Path.dirname(relativePath)
+    const absoluteDir = Path.dirname(absolutePath)
     const relativeDir = Path.relative(root, absoluteDir)
 
     let outputPath = template.render(output, {
