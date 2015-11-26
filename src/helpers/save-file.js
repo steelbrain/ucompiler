@@ -4,6 +4,8 @@ import FS from 'fs'
 import Path from 'path'
 import {template} from '../defaults'
 
+const debug = require('debug')('UCompiler:Save')
+
 export function saveFile(contents, config, {root, relativePath, absolutePath}, state) {
   const output = config.outputPath
 
@@ -39,6 +41,7 @@ export function saveFile(contents, config, {root, relativePath, absolutePath}, s
       outputPath = Path.join(root, outputPath)
     }
 
+    debug(`Saving ${relativePath} to ${Path.relative(root, outputPath)}`)
     return new Promise(function(resolve, reject) {
       FS.writeFile(outputPath, contents, function(err) {
         if (err) {
