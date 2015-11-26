@@ -15,11 +15,11 @@ export function findFiles(pathGiven, ignoredGiven, options) {
   } else if (isGlob(pathGiven)) {
     return findFilesGlob(pathGiven, ignored, options)
   } else {
-    const path = Path.isAbsolute(pathGiven) ? pathGiven : Path.join(options.root, pathGiven)
+    const path = Path.isAbsolute(pathGiven) ? pathGiven : Path.join(options.cwd, pathGiven)
     const stat = FS.statSync(path)
 
     if (stat.isFile()) {
-      return [Path.relative(options.root, path)]
+      return [Path.relative(options.cwd, path)]
     } else if (stat.isDirectory()) {
       return findFilesRegular(path, ignored, options)
     } else {

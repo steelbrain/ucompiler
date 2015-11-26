@@ -20,7 +20,7 @@ export function compile(path = null, givenOptions = {}) {
 
   const root = findRoot(path, options)
   const config = Object.assign({}, options.config, getConfig(root))
-  const files = findFiles(path, options.ignored, {root, config})
+  const files = findFiles(path, options.ignored, {root, config, cwd: options.cwd})
 
   return Promise.all(files.map(function({relativePath, absolutePath, fileName}) {
     // TODO: Reverse source maps when they change
