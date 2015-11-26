@@ -16,17 +16,20 @@ export function findRoot(path, options) {
     } else return options.cwd
   }
 
-  const isglob = isGlob(path)
-  const isabsolute = !isglob && Path.isAbsolute(path)
+  const pathIsGlob = isGlob(path)
+  const pathIsAbsolute = !pathIsGlob && Path.isAbsolute(path)
 
-  if (!isabsolute && options.cwd === null) {
+  if (!pathIsAbsolute && options.cwd === null) {
     throw new Error(ERROR_MESSAGE)
   }
 
-  let searchPath = getDir(isglob ? options.cwd : path)
-  if (!isabsolute) {
-    searchPath = Path.join(options.cwd, searchPath)
-  }
+  const searchPath = getDir(
+    pathIsGlob ?
+      options.cwd :
+      pathIsAbsolute ?
+        path :
+        Path.join(options.cwd, path)
+  )
   const configFile = findFile(searchPath, CONFIG_FILE_NAME)
 
   if (configFile === null) {
