@@ -19,11 +19,18 @@ export function findFiles(pathGiven, ignoredGiven, options) {
     const stat = FS.statSync(path)
 
     if (stat.isFile()) {
+
+      const fileName = Path.basename(path)
+      if (isIgnored(fileName, path, ignored)) {
+        return []
+      }
+
       return [{
         relativePath: Path.relative(options.cwd, path),
         absolutePath: path,
-        fileName: Path.basename(path)
+        fileName: fileName
       }]
+
     } else if (stat.isDirectory()) {
       return findFilesRegular(path, ignored, options)
     } else {
