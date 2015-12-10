@@ -2,7 +2,7 @@
 
 import FS from 'fs'
 import Path from 'path'
-import Minimatch from 'minimatch'
+import {isMatch} from 'micromatch'
 import isGlob from 'is-glob'
 import {DEFAULT_IGNORED} from '../defaults'
 import {isIgnored} from './common'
@@ -71,7 +71,7 @@ export function findFilesRegular(path, ignored, {root, config}) {
 
 export function findFilesGlob(path, ignored, {root, config}) {
   return findFilesBase(root, ignored, {root, config}, function(relative, _, stat) {
-    return stat.isDirectory() || Minimatch(relative, path)
+    return stat.isDirectory() || isMatch(relative, path)
   })
 }
 

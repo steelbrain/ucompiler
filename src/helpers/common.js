@@ -3,7 +3,7 @@
 import Path from 'path'
 import FS from 'fs'
 import isGlob from 'is-glob'
-import Minimatch from 'minimatch'
+import {isMatch} from 'micromatch'
 
 export function getDir(path) {
   let stat
@@ -48,7 +48,7 @@ export function findFile(root, fileName) {
 export function isIgnored(name, path, ignored) {
   return ignored.some(function(entry) {
     if (isGlob(entry)) {
-      return Minimatch(name, entry) || Minimatch(path, entry)
+      return isMatch(name, entry) || isMatch(path, entry)
     } else {
       return name === entry || path === entry
     }

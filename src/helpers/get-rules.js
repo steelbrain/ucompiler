@@ -1,7 +1,7 @@
 'use babel'
 
 import isGlob from 'is-glob'
-import Minimatch from 'minimatch'
+import {isMatch} from 'micromatch'
 
 export function getRules(relativePath, config) {
   const localConfig = {}
@@ -19,7 +19,7 @@ export function getRules(relativePath, config) {
   }
 
   config.rules.forEach(function(rule) {
-    const matches = isGlob(rule.path) ? Minimatch(relativePath, rule.path) : relativePath === rule.path
+    const matches = isGlob(rule.path) ? isMatch(relativePath, rule.path) : relativePath === rule.path
     if (matches) {
       for (const key in rule) {
         if (typeof localConfig[key] !== 'undefined' && localConfig[key] instanceof Array) {
