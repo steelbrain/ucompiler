@@ -2,6 +2,8 @@
 
 import Path from 'path'
 import FS from 'fs'
+import * as Chokidar from 'chokidar'
+import {Disposable} from 'sb-event-kit'
 import {findRoot} from './helpers/find-root'
 import {findFiles} from './helpers/find-files'
 import {getConfig} from './helpers/get-config'
@@ -34,4 +36,25 @@ export function compile(path = null, givenOptions = {}) {
       return saveFile(newContents, localConfig, paths, state)
     })
   }))
+}
+
+export function watch(path, givenOptions = {}) {
+  const options = Object.assign({
+    cwd: process.cwd()
+  }, givenOptions)
+
+  const watcher = Chokidar.watch(path)
+
+  function onChange(path) {
+    compile(path, options).catch(function(e) {
+      console.error(e)
+    })
+  }
+
+  watcher.on('change', onChange)
+  watcher.on('add', onChange)
+
+  return new Disposable(function() {
+    watcher.close()
+  })
 }
