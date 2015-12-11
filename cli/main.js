@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict'
+process.title = 'ucompiler'
 
 require('debug').enable('UCompiler:*')
 const UCompiler = require('..')
