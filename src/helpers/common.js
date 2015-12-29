@@ -6,6 +6,7 @@ import isGlob from 'is-glob'
 import {isMatch} from 'micromatch'
 
 export const isWindows = process.platform === 'win32'
+const NormalizationRegExp = /\\/g
 
 export function getDir(path) {
   let stat
@@ -59,7 +60,7 @@ export function isIgnored(name, path, ignored) {
 
 export function normalizePath(path) {
   if (isWindows) {
-    return path.replace(/\\/g, '/')
+    return path.replace(NormalizationRegExp, '/')
   } else {
     return path
   }
