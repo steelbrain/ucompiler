@@ -5,7 +5,7 @@ import Path from 'path'
 import {isMatch} from 'micromatch'
 import isGlob from 'is-glob'
 import {DEFAULT_IGNORED} from '../defaults'
-import {isIgnored} from './common'
+import {isIgnored, normalizePath} from './common'
 
 export function findFiles(pathGiven, ignoredGiven, options) {
   const ignored = DEFAULT_IGNORED.concat(ignoredGiven)
@@ -15,7 +15,7 @@ export function findFiles(pathGiven, ignoredGiven, options) {
   } else if (isGlob(pathGiven)) {
     return findFilesGlob(pathGiven, ignored, options)
   } else {
-    const path = Path.isAbsolute(pathGiven) ? pathGiven : Path.join(options.cwd, pathGiven)
+    const path = normalizePath(Path.isAbsolute(pathGiven) ? pathGiven : Path.join(options.cwd, pathGiven))
     const stat = FS.statSync(path)
 
     if (stat.isFile()) {
@@ -26,7 +26,7 @@ export function findFiles(pathGiven, ignoredGiven, options) {
       }
 
       return [{
-        relativePath: Path.relative(options.cwd, path),
+        relativePath: normalizePath(Path.relative(options.cwd, path)),
         absolutePath: path,
         fileName: fileName
       }]
@@ -43,8 +43,8 @@ export function findFilesBase(path, ignored, {root, config}, validateCallback) {
   let files = []
 
   FS.readdirSync(path).forEach(function(entryName) {
-    const absolutePath = Path.join(path, entryName)
-    const relativePath = Path.relative(root, absolutePath)
+    const absolutePath = normalizePath(Path.join(path, entryName))
+    const relativePath = normalizePath(Path.relative(root, absolutePath))
     const stat = FS.lstatSync(absolutePath)
 
     if (entryName.substr(0, 1) === '.' ||

@@ -5,6 +5,8 @@ import FS from 'fs'
 import isGlob from 'is-glob'
 import {isMatch} from 'micromatch'
 
+export const isWindows = process.platform === 'win32'
+
 export function getDir(path) {
   let stat
 
@@ -53,4 +55,12 @@ export function isIgnored(name, path, ignored) {
       return name === entry || path === entry
     }
   })
+}
+
+export function normalizePath(path) {
+  if (isWindows) {
+    return path.replace(/\\/g, '/')
+  } else {
+    return path
+  }
 }

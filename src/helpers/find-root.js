@@ -1,7 +1,7 @@
 'use babel'
 
 import Path from 'path'
-import {getDir, findFile} from './common'
+import {getDir, findFile, normalizePath} from './common'
 import {CONFIG_FILE_NAME} from '../defaults'
 import isGlob from 'is-glob'
 
@@ -9,11 +9,11 @@ const ERROR_MESSAGE = 'Either of options.cwd or options.root is required'
 
 export function findRoot(path, options) {
   if (options.root !== null) {
-    return options.root
+    return normalizePath(options.root)
   } else if (path === null) {
     if (options.cwd === null) {
       throw new Error(ERROR_MESSAGE)
-    } else return options.cwd
+    } else return normalizePath(options.cwd)
   }
 
   const pathIsGlob = isGlob(path)
@@ -33,8 +33,8 @@ export function findRoot(path, options) {
   const configFile = findFile(searchPath, CONFIG_FILE_NAME)
 
   if (configFile === null) {
-    return searchPath
+    return normalizePath(searchPath)
   } else {
-    return Path.dirname(configFile)
+    return normalizePath(Path.dirname(configFile))
   }
 }
