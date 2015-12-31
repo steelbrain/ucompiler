@@ -18,8 +18,8 @@ export const DEFAULT_IGNORED = [
   'fixture{s, }',
   'vendor',
   'dist',
-  '*.___jb_old___',
-  '*.___jb_bak___'
+  '*___jb_old___',
+  '*___jb_bak___'
 ]
 
 export const DEFAULT_CONFIG = {
