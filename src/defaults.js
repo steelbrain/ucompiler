@@ -19,7 +19,8 @@ export const DEFAULT_IGNORED = [
   'vendor',
   'dist',
   '*___jb_old___',
-  '*___jb_bak___'
+  '*___jb_bak___',
+  '*.dist.*'
 ]
 
 export const DEFAULT_CONFIG = {
