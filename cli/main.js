@@ -3,9 +3,9 @@
 process.title = 'ucompiler'
 
 require('debug').enable('UCompiler:*')
-const UCompiler = require('..')
-const knownCommands = ['go', 'watch']
-const parameters = process.argv.slice(2)
+var UCompiler = require('..')
+var knownCommands = ['go', 'watch']
+var parameters = process.argv.slice(2)
 
 if (!parameters.length || knownCommands.indexOf(parameters[0]) === -1) {
   console.log('Usage: ucompiler go|watch [path]')
