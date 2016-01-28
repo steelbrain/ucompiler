@@ -23,7 +23,7 @@ export function compile(path = null, options = {}, errorCallback = null) {
   const root = findRoot(path, options)
   const config = Object.assign({}, options.config, getConfig(root))
   const files = findFiles(path, options.ignored, {root, config, cwd: options.cwd})
-  let result = {status: true, contents: {}}
+  let results = {status: true, contents: {}}
 
   return Promise.all(files.map(function({relativePath, absolutePath, fileName}) {
     // TODO: Reverse source maps when they change
@@ -36,16 +36,16 @@ export function compile(path = null, options = {}, errorCallback = null) {
     return execute(plugins, contents, paths, {state, config: localConfig}).then(function(newContents) {
       return saveFile(newContents, localConfig, paths, state)
     }).then(function(result) {
-      result.contents[absolutePath] = result
+      results.contents[absolutePath] = result
     }, function(error) {
-      result.status = false
+      results.status = false
       if (typeof errorCallback === 'function') {
         errorCallback(error)
       }
-      result.contents[absolutePath] = null
+      results.contents[absolutePath] = null
     })
   })).then(function() {
-    return result
+    return results
   })
 }
 
