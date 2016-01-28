@@ -16,19 +16,18 @@ export function findFiles(pathGiven, ignoredGiven, options) {
     return findFilesGlob(pathGiven, ignored, options)
   } else {
     const path = normalizePath(Path.isAbsolute(pathGiven) ? pathGiven : Path.join(options.cwd, pathGiven))
+    const baseName = Path.basename(path)
+    if (isIgnored(baseName, path, ignored)) {
+      return []
+    }
+
     const stat = FS.statSync(path)
 
     if (stat.isFile()) {
-
-      const fileName = Path.basename(path)
-      if (isIgnored(fileName, path, ignored)) {
-        return []
-      }
-
       return [{
         relativePath: normalizePath(Path.relative(options.cwd, path)),
         absolutePath: path,
-        fileName: fileName
+        fileName: baseName
       }]
 
     } else if (stat.isDirectory()) {
