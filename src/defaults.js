@@ -25,6 +25,7 @@ export const DEFAULT_IGNORED = [
 
 export const DEFAULT_CONFIG = {
   outputPath: '{name}.dist.{state.ext}',
+  sourceMapPath: null,
   plugins: [],
   rules: []
 }
