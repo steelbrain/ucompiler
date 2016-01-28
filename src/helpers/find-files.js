@@ -21,7 +21,12 @@ export function findFiles(pathGiven, ignoredGiven, options) {
       return []
     }
 
-    const stat = FS.statSync(path)
+    let stat
+    try {
+      stat = FS.statSync(path)
+    } catch (_) {
+      return []
+    }
 
     if (stat.isFile()) {
       return [{
