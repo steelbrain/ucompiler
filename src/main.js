@@ -26,7 +26,6 @@ export function compile(path = null, options = {}, errorCallback = null) {
   let results = {status: true, contents: {}}
 
   return Promise.all(files.map(function({relativePath, absolutePath, fileName}) {
-    // TODO: Reverse source maps when they change
     const localConfig = getRules(relativePath, config)
     const plugins = getPlugins(root, localConfig)
     const contents = FS.readFileSync(absolutePath, {encoding: 'utf8'})
