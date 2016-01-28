@@ -20,8 +20,7 @@ export function saveFile(contents, config, {root, relativePath, absolutePath}, s
     const parsed = Path.parse(absolutePath)
     const absoluteDir = normalizePath(Path.dirname(absolutePath))
     const relativeDir = normalizePath(Path.relative(root, absoluteDir))
-
-    let outputPath = template.render(output, {
+    const templateInfo = {
       name: parsed.name,
       nameWithExt: parsed.name + parsed.ext,
       ext: parsed.ext.substr(1),
@@ -31,10 +30,18 @@ export function saveFile(contents, config, {root, relativePath, absolutePath}, s
       absolutePath: absolutePath,
       absoluteDir: absoluteDir + '/',
       state: state
-    })
+    }
+
+    let outputPath = template.render(output, templateInfo)
+    let sourceMapPath = config.sourceMapPath ? template.render(config.sourceMapPath, templateInfo) : null
 
     if (config.outputPathTrim) {
       outputPath = outputPath.replace(config.outputPathTrim, '')
+    }
+
+    if (sourceMapPath)
+    if (config.sourceMapPathTrim) {
+      sourceMapPath = sourceMapPath.replace(config.sourceMapPathTrim, '')
     }
 
     if (outputPath.indexOf('/') === -1) {
@@ -43,23 +50,52 @@ export function saveFile(contents, config, {root, relativePath, absolutePath}, s
       outputPath = Path.join(root, outputPath)
     }
 
+    if (sourceMapPath)
+    if (sourceMapPath.indexOf('/') === -1) {
+      sourceMapPath = Path.join(absoluteDir, sourceMapPath)
+    } else if (!Path.isAbsolute(sourceMapPath)) {
+      sourceMapPath = Path.join(root, sourceMapPath)
+    }
+
+    if (sourceMapPath) {
+      // Add a signature comment to file
+      const relativeMapPath = Path.relative(Path.dirname(outputPath), sourceMapPath)
+      const extName = Path.extname(outputPath)
+      if (extName === '.js') {
+        contents += `\n//# sourceMappingURL=${relativeMapPath}`
+      } else if (extName === '.css') {
+        contents += `\n/*# sourceMappingURL=${relativeMapPath} */`
+      }
+    }
+
     debug(`Saving ${relativePath} to ${normalizePath(Path.relative(root, outputPath))}`)
-    let firstTime = true
-    return new Promise(function writeFile(resolve, reject) {
-      FS.writeFile(outputPath, contents, function(err) {
-        if (err) {
-          if (err.code === 'ENOENT' && firstTime) {
-            firstTime = false
-            mkdirp(Path.dirname(outputPath), function(err) {
-              if (err) {
-                reject(err)
-              } else writeFile(resolve, reject)
-            })
-          } else {
-            reject(err)
-          }
-        } else resolve(contents)
-      })
+    return saveFileToDisk(outputPath, contents)
+    .then(function writeMap() {
+      if (!sourceMapPath) {
+        return
+      }
+      debug(`Saving source map of ${relativePath} to ${normalizePath(Path.relative(root, sourceMapPath))}`)
+      return saveFileToDisk(sourceMapPath, JSON.stringify(state.sourceMap))
     })
   }
+}
+
+function saveFileToDisk(filePath, contents) {
+  let firstTime = true
+  return new Promise(function writeFile(resolve, reject) {
+    FS.writeFile(filePath, contents, function(err) {
+      if (err) {
+        if (err.code === 'ENOENT' && firstTime) {
+          firstTime = false
+          mkdirp(Path.dirname(filePath), function(err) {
+            if (err) {
+              reject(err)
+            } else writeFile(resolve, reject)
+          })
+        } else {
+          reject(err)
+        }
+      } else resolve(contents)
+    })
+  })
 }
