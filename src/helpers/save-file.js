@@ -4,6 +4,7 @@ import FS from 'fs'
 import Path from 'path'
 import {template} from '../defaults'
 import {normalizePath} from './common'
+import mkdirp from 'mkdirp'
 
 const debug = require('debug')('UCompiler:Save')
 
@@ -43,10 +44,20 @@ export function saveFile(contents, config, {root, relativePath, absolutePath}, s
     }
 
     debug(`Saving ${relativePath} to ${normalizePath(Path.relative(root, outputPath))}`)
-    return new Promise(function(resolve, reject) {
+    let firstTime = true
+    return new Promise(function writeFile(resolve, reject) {
       FS.writeFile(outputPath, contents, function(err) {
         if (err) {
-          reject(err)
+          if (err.code === 'ENOENT' && firstTime) {
+            firstTime = false
+            mkdirp(Path.dirname(outputPath), function(err) {
+              if (err) {
+                reject(err)
+              } else writeFile(resolve, reject)
+            })
+          } else {
+            reject(err)
+          }
         } else resolve(contents)
       })
     })

@@ -12,17 +12,18 @@ import {getPlugins} from './helpers/get-plugins'
 import {saveFile} from './helpers/save-file'
 import {execute} from './helpers/execute'
 
-export function compile(path = null, givenOptions = {}) {
-  const options = Object.assign({
+export function compile(path = null, options = {}, errorCallback = null) {
+  options = Object.assign({
     ignored: [],
     root: null,
     cwd: null,
     config: {}
-  }, givenOptions)
+  }, options)
 
   const root = findRoot(path, options)
   const config = Object.assign({}, options.config, getConfig(root))
   const files = findFiles(path, options.ignored, {root, config, cwd: options.cwd})
+  let result = {status: true, contents: {}}
 
   return Promise.all(files.map(function({relativePath, absolutePath, fileName}) {
     // TODO: Reverse source maps when they change
@@ -34,21 +35,32 @@ export function compile(path = null, givenOptions = {}) {
 
     return execute(plugins, contents, paths, {state, config: localConfig}).then(function(newContents) {
       return saveFile(newContents, localConfig, paths, state)
+    }).then(function(result) {
+      result.contents[absolutePath] = result
+    }, function(error) {
+      result.status = false
+      if (typeof errorCallback === 'function') {
+        errorCallback(error)
+      }
+      result.contents[absolutePath] = null
     })
-  }))
+  })).then(function() {
+    return result
+  })
 }
 
-export function watch(path, givenOptions = {}) {
-  const options = Object.assign({
+export function watch(path, options = {}, errorCallback = null) {
+  options = Object.assign({
     cwd: process.cwd()
-  }, givenOptions)
+  }, options)
 
   const watcher = Chokidar.watch(path)
 
   function onChange(path) {
-    compile(path, options).catch(function(e) {
-      console.error(e)
-    })
+    const promise = compile(path, options)
+    if (typeof errorCallback === 'function') {
+      promise.catch(errorCallback)
+    }
   }
 
   watcher.on('change', onChange)

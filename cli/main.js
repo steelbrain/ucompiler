@@ -13,14 +13,19 @@ if (!parameters.length || knownCommands.indexOf(parameters[0]) === -1) {
 }
 
 if (parameters[0] === 'go') {
-  UCompiler.compile(parameters[1] || null, {cwd: process.cwd()}).catch(function(e) {
+  UCompiler.compile(parameters[1] || null, {cwd: process.cwd()}, function(e) {
     console.error(e)
-    process.exit(1)
+  }).then(function(result) {
+    if (!result.status) {
+      process.exit(1)
+    }
   })
 } else if (parameters[0] === 'watch') {
   if (!parameters[1]) {
     console.error('You must specify a path to watch')
     process.exit(1)
   }
-  UCompiler.watch(parameters[1])
+  UCompiler.watch(parameters[1], {}, function(e) {
+    console.error(e)
+  })
 }
