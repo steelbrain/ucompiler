@@ -57,7 +57,7 @@ export function watch(path, options = {}, errorCallback = null) {
   const watcher = Chokidar.watch(path)
 
   function onChange(path) {
-    const promise = compile(path, options)
+    const promise = compile(path, options, errorCallback)
     if (typeof errorCallback === 'function') {
       promise.catch(errorCallback)
     }
