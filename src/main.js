@@ -12,13 +12,13 @@ import {getPlugins} from './helpers/get-plugins'
 import {saveFile} from './helpers/save-file'
 import {execute} from './helpers/execute'
 
-export function compile(path = null, givenOptions = {}) {
-  const options = Object.assign({
+export function compile(path = null, options = {}) {
+  options = Object.assign({
     ignored: [],
     root: null,
     cwd: null,
     config: {}
-  }, givenOptions)
+  }, options)
 
   const root = findRoot(path, options)
   const config = Object.assign({}, options.config, getConfig(root))
@@ -38,10 +38,10 @@ export function compile(path = null, givenOptions = {}) {
   }))
 }
 
-export function watch(path, givenOptions = {}) {
-  const options = Object.assign({
+export function watch(path, options = {}) {
+  options = Object.assign({
     cwd: process.cwd()
-  }, givenOptions)
+  }, options)
 
   const watcher = Chokidar.watch(path)
 
