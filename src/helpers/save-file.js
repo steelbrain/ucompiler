@@ -57,6 +57,17 @@ export function saveFile(contents, config, {root, relativePath, absolutePath}, s
       sourceMapPath = Path.join(root, sourceMapPath)
     }
 
+    if (sourceMapPath) {
+      // Add a signature comment to file
+      const relativeMapPath = Path.relative(Path.dirname(outputPath), sourceMapPath)
+      const extName = Path.extname(outputPath)
+      if (extName === '.js') {
+        contents += `\n//# sourceMappingURL=${relativeMapPath}`
+      } else if (extName === '.css') {
+        contents += `\n/*# sourceMappingURL=${relativeMapPath} */`
+      }
+    }
+
     debug(`Saving ${relativePath} to ${normalizePath(Path.relative(root, outputPath))}`)
     return saveFileToDisk(outputPath, contents)
     .then(function writeMap() {
