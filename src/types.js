@@ -18,10 +18,11 @@ export type UCompiler$Job = {
 
 export type Ucompiler$Config = {
   defaultRule: string,
-  rules: Map<string, Ucompiler$Config$Rule>
+  rules: Array<Ucompiler$Config$Rule>
 }
 
 export type Ucompiler$Config$Rule = {
+  name: string,
   plugins: Array<string>,
   include: Array<{
     directory: string,
