@@ -6,6 +6,7 @@ import Path from 'path'
 import {readdir, stat, isExcluded, normalizePath} from './common'
 import {DEFAULT_IGNORED} from '../defaults'
 import type {Ucompiler$Config$Rule} from '../types'
+import type {Stats} from 'fs'
 
 export async function scanFiles(rootDirectory: string, config: Ucompiler$Config$Rule): Promise<Array<string>> {
   let files = []
@@ -16,14 +17,13 @@ export async function scanFiles(rootDirectory: string, config: Ucompiler$Config$
   }
 
   for (const includeEntry of config.include) {
-    const allowedExtensions = new Set(includeEntry.extensions)
     const includeDirectory = Path.join(rootDirectory, includeEntry.directory)
     const searchDeep = typeof includeEntry.deep === 'undefined' ? true : includeEntry.deep
     promises.push(await scanFilesInDirectory(
       rootDirectory,
       includeDirectory,
       searchDeep,
-      allowedExtensions,
+      includeEntry.extensions,
       excluded
     ))
   }
@@ -40,7 +40,7 @@ export async function scanFilesInDirectory(
   rootDirectory: string,
   directory: string,
   deep: boolean,
-  extensions: Set<string>,
+  extensions: Array<string>,
   excluded: Array<string>
 ): Promise<Array<string>> {
   const contents = await readdir(directory)
@@ -49,22 +49,14 @@ export async function scanFilesInDirectory(
 
   for (const entry of contents) {
     const entryPath = normalizePath(Path.join(directory, entry))
-    const entryRelativePath = normalizePath(Path.relative(rootDirectory, entryPath))
     const entryStats = await stat(entryPath)
 
-    if (isExcluded([entryRelativePath, entryPath, entry], excluded)) {
-      continue
-    }
-
-    if (entryStats.isFile()) {
-
-      const extName = Path.extname(entry).slice(1)
-      if (extensions.has(extName)) {
+    if (validateNode(rootDirectory, entryPath, excluded, extensions, entryStats, deep)) {
+      if (entryStats.isFile()) {
         entries.push(entryPath)
+      } else {
+        promises.push(await scanFilesInDirectory(rootDirectory, entryPath, deep, extensions, excluded))
       }
-
-    } else if (entryStats.isDirectory() && deep) {
-      promises.push(await scanFilesInDirectory(rootDirectory, entryPath, deep, extensions, excluded))
     }
   }
 
@@ -74,4 +66,30 @@ export async function scanFilesInDirectory(
   })
 
   return entries
+}
+
+export function validateNode(
+  rootDirectory: string,
+  entryPath: string,
+  excluded: Array<string>,
+  extensions: Array<string>,
+  stats: Stats,
+  deep: boolean
+): boolean {
+  const entryRelativePath = normalizePath(Path.relative(rootDirectory, entryPath))
+
+  if (isExcluded([entryRelativePath, entryPath, Path.basename(entryPath)], excluded)) {
+    return false
+  }
+
+  if (stats.isFile()) {
+    const extName = Path.extname(entryPath).slice(1)
+    if (extensions.indexOf(extName) !== -1) {
+      return true
+    }
+  }
+  if (stats.isDirectory() && deep) {
+    return true
+  }
+  return false
 }
