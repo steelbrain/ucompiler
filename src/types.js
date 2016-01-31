@@ -11,20 +11,24 @@ export type Ucompiler$Plugins = {
 export type UCompiler$Plugin = {
   compiler: boolean,
   minifier: boolean,
-  process: ((parameters: UCompiler$Job) => {
-    contents: string,
-    sourceMap?: {
-      sources: Array<string>,
-      mappings: string,
-      names: Array<string>
-    }
-  })
+  process: ((contents:string, parameters: UCompiler$Job) => UCompiler$Plugin$Result)
+}
+
+export type UCompiler$Plugin$Result = {
+  contents: string,
+  sourceMap?: ?UCompiler$SourceMap
+}
+
+export type UCompiler$SourceMap = {
+  sources: Array<string>,
+  sourcesContent: Array<string>,
+  mappings: string,
+  names: Array<string>
 }
 
 export type UCompiler$Job = {
   rootDirectory: string,
   filePath: string,
-  contents: string,
   state: Object,
   config: Object
 }
