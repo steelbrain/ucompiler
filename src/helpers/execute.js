@@ -2,7 +2,7 @@
 
 import {transfer} from 'multi-stage-sourcemap'
 
-export function execute(plugins, contents, paths, meta) {
+export function execute(plugins, parameters) {
   // Sequence:
   // 1. Compilers
   // 2. General
@@ -18,12 +18,14 @@ export function execute(plugins, contents, paths, meta) {
           sourceMapDiff(meta.state, lastMap)
         }
         lastMap = meta.state.sourceMap
-        return plugin.process(contents, paths, meta)
+        parameters.contents = contents
+        return plugin.process(parameters)
       })
-    }, Promise.resolve(contents)).then(function(contents) {
+    }, Promise.resolve(parameters.contents)).then(function(contents) {
       if (lastMap && meta.state.sourceMap !== lastMap) {
         sourceMapDiff(meta.state, lastMap)
       }
+      parameters.contents = contents
       return contents
     })
 }
