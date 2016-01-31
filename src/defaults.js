@@ -1,14 +1,16 @@
 'use babel'
 
+/* @flow */
+
 import {Template} from 'string-templates'
 
-export const CONFIG_FILE_NAME = '.ucompilerrc'
+export const CONFIG_FILE_NAME: string = '.ucompilerrc'
 
-export const DEFAULT_IGNORED = [
+export const DEFAULT_IGNORED: Array<string> = [
   'node_modules',
   'bower_components',
   'coverage',
-  't{e, }mp',
+  't{e,}mp',
   '*.min.js',
   '*.log',
   'bundle.js',
@@ -22,12 +24,5 @@ export const DEFAULT_IGNORED = [
   '*___jb_bak___',
   '*.dist.*'
 ]
-
-export const DEFAULT_CONFIG = {
-  outputPath: '{name}.dist.{state.ext}',
-  sourceMapPath: null,
-  plugins: [],
-  rules: []
-}
 
 export const template = Template.create()
