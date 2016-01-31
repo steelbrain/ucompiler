@@ -1,22 +1,17 @@
 'use babel'
 
-import FS from 'fs'
+/* @flow */
+
 import Path from 'path'
-import {DEFAULT_CONFIG, CONFIG_FILE_NAME} from '../defaults'
+import type {Ucompiler$Config} from '../types'
+import {read} from './common'
+import {CONFIG_FILE_NAME} from '../defaults'
 
-export function getConfig(root) {
-  const configPath = Path.join(root, CONFIG_FILE_NAME)
-
-  let config = Object.assign({}, DEFAULT_CONFIG)
+export async function getConfig(directory: string): Promise<Ucompiler$Config> {
+  const configPath = Path.join(directory, CONFIG_FILE_NAME)
   try {
-    FS.accessSync(configPath, FS.R_OK)
-    const contents = FS.readFileSync(configPath)
-    try {
-      Object.assign(config, JSON.parse(contents))
-    } catch (_) {
-      throw new Error(`Malformed configuration file located at ${configPath}`)
-    }
-  } catch (_) {}
-
-  return config
+    return JSON.parse(await read(configPath))
+  } catch (_) {
+    throw new Error(`Malformed JSON configuration found at ${configPath}`)
+  }
 }
