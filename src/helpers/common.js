@@ -6,11 +6,34 @@ import Path from 'path'
 import FS from 'fs'
 import isGlob from 'is-glob'
 import {isMatch} from 'micromatch'
+import type {Stats} from 'fs'
 
 export const R_OK = 4
 export const W_OK = 2
 export const NormalizationRegExp = /\\/g
 export const FindCache: Map<string, string> = new Map()
+
+// TODO: Put these file system helpers to a node module
+
+export function stat(path: string): Promise<Stats> {
+  return new Promise(function(resolve, reject) {
+    FS.lstat(path, function(error, stats) {
+      if (error) {
+        reject(error)
+      } else resolve(stats)
+    })
+  })
+}
+
+export function readdir(path: string): Promise<Array<string>> {
+  return new Promise(function(resolve, reject) {
+    FS.readdir(path, function(error, entries) {
+      if (error) {
+        reject(error)
+      } else resolve(entries)
+    })
+  })
+}
 
 export function read(path: string): Promise<string> {
   return new Promise(function(resolve, reject) {
@@ -76,7 +99,7 @@ export async function findCached(rootDirectory: string, fileName: string): Promi
   return filePath
 }
 
-export function isIgnored(fileNames: Array<string> , ignored: Array<string>): boolean {
+export function isExcluded(fileNames: Array<string> , ignored: Array<string>): boolean {
   return ignored.some(function(entry) {
     const entryIsGlob = isGlob(entry)
     for (const fileName of fileNames) {
