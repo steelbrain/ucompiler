@@ -5,11 +5,18 @@
 export type UCompiler$Plugin = {
   compiler: boolean,
   minifier: boolean,
-  process: ((parameters: UCompiler$Job) => string)
+  process: ((parameters: UCompiler$Job) => {
+    contents: string,
+    sourceMap?: {
+      sources: Array<string>,
+      mappings: string,
+      names: Array<string>
+    }
+  })
 }
 
 export type UCompiler$Job = {
-  rootPath: string,
+  rootDirectory: string,
   filePath: string,
   contents: string,
   state: Object,
@@ -32,4 +39,16 @@ export type Ucompiler$Config$Rule = {
   exclude?: Array<string>,
   outputPath: string,
   sourceMap?: string
+}
+
+export type Ucompiler$Compile$Results = {
+  status: boolean,
+  contents: Array<{
+    path: string,
+    contents: string
+  }>,
+  sourceMaps: Array<{
+    path: string,
+    contents: string
+  }>
 }
