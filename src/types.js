@@ -60,7 +60,6 @@ export type Ucompiler$Compile$Results = {
 }
 
 export type Ucompiler$Compile$Result = {
-  status: boolean,
   contents: {
     path: string,
     contents: string
