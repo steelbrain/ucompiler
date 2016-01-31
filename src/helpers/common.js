@@ -10,8 +10,9 @@ import {isMatch} from 'micromatch'
 export const R_OK = 4
 export const W_OK = 2
 export const NormalizationRegExp = /\\/g
+export const FindCache: Map<string, string> = new Map()
 
-export function findFile(rootDirectory: string, fileName: string): ?string {
+export function find(rootDirectory: string, fileName: string): ?string {
   try {
     FS.accessSync(rootDirectory, R_OK)
   } catch (_) {
@@ -31,6 +32,25 @@ export function findFile(rootDirectory: string, fileName: string): ?string {
     chunks.pop()
   }
   return null
+}
+
+export function findCached(rootDirectory: string, fileName: string): ?string {
+  const cacheKey = rootDirectory + ':' + fileName
+
+  if (FindCache.has(cacheKey)) {
+    const cachedFilePath = FindCache.get(cacheKey)
+    try {
+      FS.accessSync(rootDirectory, R_OK)
+      return cachedFilePath
+    } catch (_) {
+      FindCache.delete(cacheKey)
+    }
+  }
+  const filePath = find(rootDirectory, fileName)
+  if (filePath) {
+    FindCache.set(cacheKey, filePath)
+  }
+  return filePath
 }
 
 export function isIgnored(fileNames: Array<string> , ignored: Array<string>): boolean {
