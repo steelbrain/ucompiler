@@ -117,3 +117,13 @@ export function normalizePath(path: string): string {
   }
   return path
 }
+
+export function asyncReduce<TItem, TValue>(items: Array<TItem>, initialValue: TValue, callback:((item: TItem, value: TValue) => Promise<TValue>)): Promise<TValue> {
+  return items.reduce(function(promise, item) {
+    return promise.then(function(previousResult) {
+      return callback(item, previousResult)
+    })
+  }, new Promise(function(resolve) {
+    resolve(initialValue)
+  }))
+}
