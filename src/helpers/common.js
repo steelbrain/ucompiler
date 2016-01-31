@@ -1,46 +1,31 @@
 'use babel'
 
+/* @flow */
+
 import Path from 'path'
 import FS from 'fs'
 import isGlob from 'is-glob'
 import {isMatch} from 'micromatch'
 
-export const isWindows = process.platform === 'win32'
-const NormalizationRegExp = /\\/g
+export const R_OK = 4
+export const W_OK = 2
+export const NormalizationRegExp = /\\/g
 
-export function getDir(path) {
-  let stat
-
+export function findFile(rootDirectory: string, fileName: string): ?string {
   try {
-    stat = FS.statSync(path)
+    FS.accessSync(rootDirectory, R_OK)
   } catch (_) {
-    throw new Error(`Error reading ${path}`)
+    throw new Error(`Can not read directory ${rootDirectory}`)
   }
 
-  if (stat.isFile()) {
-    return Path.dirname(path)
-  } else if (stat.isDirectory()) {
-    return path
-  } else {
-    throw new Error(`${path} is neither a file nor a directory`)
-  }
-}
-
-export function findFile(root, fileName) {
-  try {
-    FS.accessSync(root, FS.R_OK)
-  } catch (_) {
-    throw new Error(`Can not read directory ${root}`)
-  }
-
-  const chunks = root.split(Path.sep)
+  const chunks = rootDirectory.split(Path.sep)
   while (chunks.length) {
     const filePath = Path.join(chunks.join(Path.sep), fileName)
     if (filePath === fileName) {
       break
     }
     try {
-      FS.accessSync(filePath, FS.R_OK)
+      FS.accessSync(filePath, R_OK)
       return filePath
     } catch (_) {}
     chunks.pop()
@@ -48,20 +33,21 @@ export function findFile(root, fileName) {
   return null
 }
 
-export function isIgnored(name, path, ignored) {
+export function isIgnored(fileNames: Array<string> , ignored: Array<string>): boolean {
   return ignored.some(function(entry) {
-    if (isGlob(entry)) {
-      return isMatch(name, entry) || isMatch(path, entry)
-    } else {
-      return name === entry || path === entry
+    const entryIsGlob = isGlob(entry)
+    for (const fileName of fileNames) {
+      if (entryIsGlob ? isMatch(fileName, entry) : fileName === entry) {
+        return true
+      }
     }
+    return false
   })
 }
 
-export function normalizePath(path) {
-  if (isWindows) {
+export function normalizePath(path: string): string {
+  if (process.platform === 'win32') {
     return path.replace(NormalizationRegExp, '/')
-  } else {
-    return path
   }
+  return path
 }
