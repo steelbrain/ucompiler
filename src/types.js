@@ -2,6 +2,12 @@
 
 /* @flow */
 
+export type Ucompiler$Plugins = {
+  compilers: Array<UCompiler$Plugin>,
+  general: Array<UCompiler$Plugin>,
+  minifiers: Array<UCompiler$Plugin>
+}
+
 export type UCompiler$Plugin = {
   compiler: boolean,
   minifier: boolean,
