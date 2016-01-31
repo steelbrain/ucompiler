@@ -12,10 +12,17 @@ export const W_OK = 2
 export const NormalizationRegExp = /\\/g
 export const FindCache: Map<string, string> = new Map()
 
-export function find(rootDirectory: string, fileName: string): ?string {
+export function exists(path: string): boolean {
   try {
-    FS.accessSync(rootDirectory, R_OK)
+    FS.accessSync(path, R_OK)
+    return true
   } catch (_) {
+    return false
+  }
+}
+
+export function find(rootDirectory: string, fileName: string): ?string {
+  if (!exists(rootDirectory)) {
     throw new Error(`Can not read directory ${rootDirectory}`)
   }
 
@@ -25,10 +32,9 @@ export function find(rootDirectory: string, fileName: string): ?string {
     if (filePath === fileName) {
       break
     }
-    try {
-      FS.accessSync(filePath, R_OK)
+    if (exists(filePath)) {
       return filePath
-    } catch (_) {}
+    }
     chunks.pop()
   }
   return null
@@ -36,15 +42,13 @@ export function find(rootDirectory: string, fileName: string): ?string {
 
 export function findCached(rootDirectory: string, fileName: string): ?string {
   const cacheKey = rootDirectory + ':' + fileName
+  const cachedFilePath = FindCache.get(cacheKey)
 
-  if (FindCache.has(cacheKey)) {
-    const cachedFilePath = FindCache.get(cacheKey)
-    try {
-      FS.accessSync(rootDirectory, R_OK)
+  if (cachedFilePath) {
+    if (exists(cachedFilePath)) {
       return cachedFilePath
-    } catch (_) {
-      FindCache.delete(cacheKey)
     }
+    FindCache.delete(cacheKey)
   }
   const filePath = find(rootDirectory, fileName)
   if (filePath) {
