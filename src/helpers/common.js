@@ -12,6 +12,26 @@ export const W_OK = 2
 export const NormalizationRegExp = /\\/g
 export const FindCache: Map<string, string> = new Map()
 
+export function read(path: string): Promise<string> {
+  return new Promise(function(resolve, reject) {
+    FS.readFile(path, function(error, contents) {
+      if (error) {
+        reject(error)
+      } else resolve(contents.toString())
+    })
+  })
+}
+
+export function write(path: string, contents: string): Promise {
+  return new Promise(function(resolve, reject) {
+    FS.writeFile(path, contents, function(error) {
+      if (error) {
+        reject(error)
+      } else resolve()
+    })
+  })
+}
+
 export function exists(path: string): Promise<boolean> {
   return new Promise(function(resolve) {
     FS.access(path, function(error) {
