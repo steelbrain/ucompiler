@@ -11,7 +11,7 @@ export type Ucompiler$Plugins = {
 export type UCompiler$Plugin = {
   compiler: boolean,
   minifier: boolean,
-  process: ((contents:string, parameters: UCompiler$Job) => UCompiler$Plugin$Result)
+  process: ((contents:string, parameters: UCompiler$Job) => ?UCompiler$Plugin$Result)
 }
 
 export type UCompiler$Plugin$Result = {

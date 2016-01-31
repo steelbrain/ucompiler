@@ -23,13 +23,16 @@ export async function execute(
   }, async function(plugin, previousResult) {
     const result = await plugin.process(previousResult.contents, job)
 
-    if (result.sourceMap && previousResult.sourceMap) {
-      result.sourceMap = reverseSourceMap(result.sourceMap, previousResult.sourceMap)
-    } else if (previousResult.sourceMap) {
-      result.sourceMap = previousResult.sourceMap
+    if (result) {
+      if (result.sourceMap && previousResult.sourceMap) {
+        result.sourceMap = reverseSourceMap(result.sourceMap, previousResult.sourceMap)
+      } else if (previousResult.sourceMap) {
+        result.sourceMap = previousResult.sourceMap
+      }
+      return result
     }
 
-    return result
+    return previousResult
   })
 }
 
