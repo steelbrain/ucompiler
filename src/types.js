@@ -49,6 +49,18 @@ export type Ucompiler$Compile$Results = {
   }>,
   sourceMaps: Array<{
     path: string,
-    contents: string
+    contents: ?string
   }>
+}
+
+export type Ucompiler$Compile$Result = {
+  status: boolean,
+  contents: {
+    path: string,
+    contents: string
+  },
+  sourceMap: {
+    path: string,
+    contents: ?string
+  }
 }
