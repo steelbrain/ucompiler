@@ -9,6 +9,7 @@ import type {Ucompiler$Config$Rule} from '../types'
 
 export async function scanFiles(rootDirectory: string, config: Ucompiler$Config$Rule): Promise<Array<string>> {
   let files = []
+  let promises = []
   let excluded = DEFAULT_IGNORED
   if (config.exclude) {
     excluded = excluded.concat(config.exclude)
@@ -18,7 +19,7 @@ export async function scanFiles(rootDirectory: string, config: Ucompiler$Config$
     const allowedExtensions = new Set(includeEntry.extensions)
     const includeDirectory = Path.join(rootDirectory, includeEntry.directory)
     const searchDeep = typeof includeEntry.deep === 'undefined' ? true : includeEntry.deep
-    files = files.concat(await scanFilesInDirectory(
+    promises.push(await scanFilesInDirectory(
       rootDirectory,
       includeDirectory,
       searchDeep,
@@ -26,6 +27,11 @@ export async function scanFiles(rootDirectory: string, config: Ucompiler$Config$
       excluded
     ))
   }
+
+  let results = await Promise.all(promises)
+  results.forEach(function(nestedFiles) {
+    files = files.concat(nestedFiles)
+  })
 
   return files
 }
@@ -39,6 +45,8 @@ export async function scanFilesInDirectory(
 ): Promise<Array<string>> {
   const contents = await readdir(directory)
   let entries = []
+  let promises = []
+
   for (const entry of contents) {
     const entryPath = normalizePath(Path.join(directory, entry))
     const entryRelativePath = normalizePath(Path.relative(rootDirectory, entryPath))
@@ -56,8 +64,14 @@ export async function scanFilesInDirectory(
       }
 
     } else if (entryStats.isDirectory() && deep) {
-      entries = entries.concat(await scanFilesInDirectory(rootDirectory, entryPath, deep, extensions, excluded))
+      promises.push(await scanFilesInDirectory(rootDirectory, entryPath, deep, extensions, excluded))
     }
   }
+
+  let results = await Promise.all(promises)
+  results.forEach(function(nestedEntries) {
+    entries = entries.concat(nestedEntries)
+  })
+
   return entries
 }
