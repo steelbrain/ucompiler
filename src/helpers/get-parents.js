@@ -2,16 +2,15 @@
 
 /* @flow */
 
-export function getParents(files: Map<string, Array<string>>): Map<string, Array<string>> {
-  const parents = new Map()
+export function getParents(importsMap: Map<string, Array<string>>, filePath: string): Array<string> {
+  const parents = []
 
-  for (const [filePath, imports] of files) {
+  for (const [filePath, imports] of importsMap) {
     for (const entry of imports) {
-      let entryParents = parents.get(entry)
-      if (!entryParents) {
-        parents.set(entry, entryParents = [])
+      if (entry === filePath) {
+        parents.push(filePath)
+        break
       }
-      entryParents.push(filePath)
     }
   }
 

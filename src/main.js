@@ -54,11 +54,10 @@ export async function compile(
   await Promise.all(promises)
 
   if (saveContents) {
-    const parentsMap = getParents(imports)
     promises = files.map(function(filePath) {
-      const imports = parentsMap.get(filePath) || []
+      const parents = getParents(imports, filePath)
       const result = results.get(filePath)
-      if (result && (!imports.length || saveIncludedFiles)) {
+      if (result && (!parents.length || saveIncludedFiles)) {
         return saveFile(rootDirectory, result, config)
       }
     })
@@ -99,25 +98,50 @@ export async function compileFile(
 export async function watch(
   directory: string,
   ruleName: string,
-  errorCallback: ((error: Error) => void) = function(e) { console.error(e.stack) }
+  errorCallback: ((error: Error) => void) = function(e) { console.error(e.stack) },
+  saveIncludedFiles: boolean = false
 ): Promise {
   const rootDirectory = await findRoot(directory)
   const {rule: config} = await getConfig(rootDirectory, ruleName)
   const targetDirectories = config.include.map(function(entry) {
     return Path.join(rootDirectory, entry.directory)
   })
+  const imports = new Map()
+  const results = new Map()
+  let initialized = false
 
-  function onChange(filePath) {
+  function localCompileFile(filePath) {
     compileFile(rootDirectory, filePath, config).then(function(result) {
-      saveFile(rootDirectory, result, config)
+      imports.set(filePath, result.state.imports)
+      if (initialized) {
+        localProcessResult(filePath, result)
+      } else {
+        results.set(filePath, result)
+      }
     }).catch(errorCallback)
+  }
+  function localProcessResult(filePath, result) {
+    const parents = getParents(imports, filePath)
+    if (!parents.length || saveIncludedFiles) {
+      saveFile(rootDirectory, result, config)
+    }
+    parents.forEach(localCompileFile)
   }
 
   const watcher = Chokidar.watch(targetDirectories)
-  watcher.on('change', onChange)
-  watcher.on('add', onChange)
+  watcher.on('change', localCompileFile)
+  watcher.on('add', localCompileFile)
+  watcher.on('ready', function() {
+    initialized = true
+    for (const [filePath, result] of results) {
+      localProcessResult(filePath, result)
+    }
+    results.clear()
+  })
 
   return new Disposable(function() {
     watcher.close()
+    imports.clear()
+    results.clear()
   })
 }
