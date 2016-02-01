@@ -14,18 +14,20 @@ import {getPlugins} from './helpers/get-plugins'
 import {execute} from './helpers/execute'
 import {fromObject} from './helpers/source-map'
 import {saveFile} from './helpers/save-file'
+import {getParents} from './helpers/get-parents'
 import type {Ucompiler$Compile$Results, Ucompiler$Compile$Result, Ucompiler$Config$Rule} from './types'
 
 export async function compile(
   directory: string,
   ruleName:?string = null,
   errorCallback: ((error: Error) => void) = function(e) { throw e },
-  saveContents: boolean = true
+  saveContents: boolean = true,
+  saveIncludedFiles: boolean = false
 ): Promise<Ucompiler$Compile$Results> {
   const rootDirectory = await findRoot(directory)
   const {rule: config} = await getConfig(rootDirectory, ruleName)
   const files = await scanFiles(rootDirectory, config)
-  let promises = []
+  let promises
 
   const toReturn = {
     status: true,
@@ -33,12 +35,16 @@ export async function compile(
     sourceMaps: [],
     state: []
   }
+  const imports = new Map()
+  const results = new Map()
 
-  promises = files.map(filePath => {
+  promises = files.map(function(filePath) {
     return compileFile(rootDirectory, filePath, config).then(function(result) {
       toReturn.contents.push({path: filePath, contents: result.contents})
       toReturn.sourceMaps.push({path: filePath, contents: result.sourceMap})
       toReturn.state.push({path: filePath, state: result.state})
+      imports.set(filePath, result.state.imports)
+      results.set(filePath, result)
     }, function(e) {
       toReturn.status = false
       errorCallback(e)
@@ -46,6 +52,22 @@ export async function compile(
   })
 
   await Promise.all(promises)
+
+  if (saveContents) {
+    const parentsMap = getParents(imports)
+    promises = files.map(function(filePath) {
+      const imports = parentsMap.get(filePath) || []
+      const result = results.get(filePath)
+      if (result && (!imports.length || saveIncludedFiles)) {
+        return saveFile(rootDirectory, result, config)
+      }
+    })
+
+    await Promise.all(promises)
+  }
+
+  results.clear()
+  imports.clear()
 
   return toReturn
 }
@@ -86,7 +108,7 @@ export async function watch(
   })
 
   function onChange(filePath) {
-    compileFile(rootDirectory, filePath, config, { imports: [] }).then(function(result) {
+    compileFile(rootDirectory, filePath, config).then(function(result) {
       saveFile(rootDirectory, result, config)
     }).catch(errorCallback)
   }
