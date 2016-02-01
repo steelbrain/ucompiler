@@ -60,6 +60,10 @@ export type Ucompiler$Compile$Results = {
   sourceMaps: Array<{
     path: string,
     contents: ?string
+  }>,
+  state: Array<{
+    path: string,
+    state: Object
   }>
 }
 
@@ -71,5 +75,9 @@ export type Ucompiler$Compile$Result = {
   sourceMap: {
     path: string,
     contents: ?string
+  },
+  state: {
+    path: string,
+    state: Object
   }
 }

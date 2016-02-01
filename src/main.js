@@ -20,16 +20,19 @@ export async function compile(
   errorCallback: ((error: Error) => void) = function(e) { throw e }
 ): Promise<Ucompiler$Compile$Results> {
   const rootDirectory = await findRoot(directory)
-  const {config: globalConfig, rule: config} = await getConfig(rootDirectory, ruleName)
+  const {rule: config} = await getConfig(rootDirectory, ruleName)
   const files = await scanFiles(rootDirectory, config)
 
   const toReturn = {
     status: true,
     contents: [],
-    sourceMaps: []
+    sourceMaps: [],
+    state: []
   }
 
-  const promises = files.map(filePath => compileFile(rootDirectory, filePath, config).catch(errorCallback))
+  const promises = files.map(filePath => {
+    return compileFile(rootDirectory, filePath, config, { imports: [] }).catch(errorCallback)
+  })
 
   const results = await Promise.all(promises)
   for (const result of results) {
@@ -40,6 +43,7 @@ export async function compile(
 
     toReturn.contents.push(result.contents)
     toReturn.sourceMaps.push(result.sourceMap)
+    toReturn.state.push(result.state)
   }
 
   return toReturn
@@ -48,7 +52,8 @@ export async function compile(
 export async function compileFile(
   rootDirectory: string,
   filePath: string,
-  config: Ucompiler$Config$Rule
+  config: Ucompiler$Config$Rule,
+  state: Object
 ): Promise<Ucompiler$Compile$Result> {
   const fileContents = await read(filePath)
 
@@ -56,9 +61,7 @@ export async function compileFile(
   const result = await execute(plugins, fileContents, {
     rootDirectory: rootDirectory,
     filePath: filePath,
-    state: {
-      imports: []
-    },
+    state: state,
     config: config
   })
 
@@ -70,6 +73,10 @@ export async function compileFile(
     sourceMap: {
       path: filePath,
       contents: result.sourceMap ? fromObject(rootDirectory, filePath, result.sourceMap) : null
+    },
+    state: {
+      path: filePath,
+      state: state
     }
   }
 }
