@@ -24,11 +24,10 @@ export async function execute(
     // $FlowIgnore: I don't know why flow doesn't like this?
     const result = await plugin.process(previousResult.contents, job)
 
-    if (typeof result !== 'object' || typeof result.contents !== 'string') {
-      throw new Error(`Plugin '${plugin.name}' returned an invalid result`)
-    }
-
     if (result) {
+      if (typeof result !== 'object' || typeof result.contents !== 'string') {
+        throw new Error(`Plugin '${plugin.name}' returned an invalid result`)
+      }
       if (result.sourceMap && previousResult.sourceMap) {
         result.sourceMap = reverseSourceMap(result.sourceMap, previousResult.sourceMap)
       } else if (previousResult.sourceMap) {
