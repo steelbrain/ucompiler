@@ -12,12 +12,14 @@ import {getConfig} from './helpers/get-config'
 import {getPlugins} from './helpers/get-plugins'
 import {execute} from './helpers/execute'
 import {fromObject} from './helpers/source-map'
+import {saveFile} from './helpers/save-file'
 import type {Ucompiler$Compile$Results, Ucompiler$Compile$Result, Ucompiler$Config$Rule} from './types'
 
 export async function compile(
   directory: string,
   ruleName:?string = null,
-  errorCallback: ((error: Error) => void) = function(e) { throw e }
+  errorCallback: ((error: Error) => void) = function(e) { throw e },
+  saveContents: boolean = true
 ): Promise<Ucompiler$Compile$Results> {
   const rootDirectory = await findRoot(directory)
   const {rule: config} = await getConfig(rootDirectory, ruleName)
@@ -44,6 +46,10 @@ export async function compile(
     toReturn.contents.push(result.contents)
     toReturn.sourceMaps.push(result.sourceMap)
     toReturn.state.push(result.state)
+
+    if (saveContents) {
+      await saveFile(rootDirectory, result, config)
+    }
   }
 
   return toReturn
@@ -66,17 +72,9 @@ export async function compileFile(
   })
 
   return {
-    contents: {
-      path: filePath,
-      contents: result.contents
-    },
-    sourceMap: {
-      path: filePath,
-      contents: result.sourceMap ? fromObject(rootDirectory, filePath, result.sourceMap) : null
-    },
-    state: {
-      path: filePath,
-      state: state
-    }
+    filePath: filePath,
+    contents: result.contents,
+    sourceMap: result.sourceMap ? fromObject(rootDirectory, filePath, result.sourceMap) : null,
+    state: state
   }
 }

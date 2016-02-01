@@ -48,7 +48,7 @@ export type Ucompiler$Config$Rule = {
   }>,
   exclude?: Array<string>,
   outputPath: string,
-  sourceMap?: string
+  sourceMapPath?: string
 }
 
 export type Ucompiler$Compile$Results = {
@@ -68,16 +68,8 @@ export type Ucompiler$Compile$Results = {
 }
 
 export type Ucompiler$Compile$Result = {
-  contents: {
-    path: string,
-    contents: string
-  },
-  sourceMap: {
-    path: string,
-    contents: ?string
-  },
-  state: {
-    path: string,
-    state: Object
-  }
+  filePath: string,
+  contents: string,
+  sourceMap: ?string,
+  state: Object
 }
