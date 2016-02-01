@@ -26,4 +26,6 @@ export const DEFAULT_IGNORED: Array<string> = [
   '*.dist.*'
 ]
 
-export const template = Template.create()
+export const template:{
+  render: ((template: string, parameters: Object) => string),
+} = Template.create()
