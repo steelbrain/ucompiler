@@ -7,6 +7,7 @@ import FS from 'fs'
 import isGlob from 'is-glob'
 import {isMatch} from 'micromatch'
 import type {Stats} from 'fs'
+import mkdirp from 'mkdirp'
 
 export const R_OK = 4
 export const W_OK = 2
@@ -46,10 +47,16 @@ export function read(path: string): Promise<string> {
 }
 
 export function write(path: string, contents: string): Promise {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function writeFile(resolve, reject, retry = true) {
     FS.writeFile(path, contents, function(error) {
       if (error) {
-        reject(error)
+        if (error.code === 'ENOENT' && retry) {
+          mkdirp(Path.dirname(path), function(error) {
+            if (error) {
+              reject(error)
+            } else writeFile(resolve, reject, false)
+          })
+        } else reject(error)
       } else resolve()
     })
   })
