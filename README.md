@@ -6,57 +6,81 @@ UCompiler is the next generation assets manager. It's built to be extended and p
 #### Installation
 
 Installing UCompiler is easy, just execute this in a terminal
+
 ```
 npm install -g ucompiler
 ```
 
 #### Configuration
 
-UCompiler is very flexible and can be customized in several ways. The configuration file for ucompiler should be valid JSON written as `.ucompilerrc` in your project-root.
+UCompiler is extremely customizable and hackable to the core. It can be configured with it's JSON configuration
+file written as `.ucompiler`.
 
-UCompiler's configuration is directly passed to the plugins, so it can contain info intended for the plugins as well.
-The fields that UCompiler recognizes are `plugins` and `rules`.
-Here's an example configuration file
+Here's an example ucompiler configuration for a project using less and babel plugins
 
 ```json
 {
-  "plugins": ["babel", "less"],
-  "rules": [
-    {
-      "path": "src/*",
-      "outputPath": "lib/{name}.js"
+  "defaultRule": "compile-babel",
+  "rules": [{
+    "name": "compile-babel",
+    "plugins": ["babel"],
+    "babel": {
+      "presets": ["steelbrain"]
     },
-    {
-      "path": "assets/less/*",
-      "outputPath": "assets/css/{name}.css"
-    },
-    {
-      "path": "myapp/**/*.js",
-      "outputPath": "myapp-compiled/{relativeDir}{name}.js",
-      "outputPathTrim": "myapp"
-    }
-  ]
+    "include": [{
+      "directory": "src",
+      "extensions": ["js"]
+    }],
+    "outputPath": "scripts/{relativePath:4}"
+  }, {
+    "name": "compile-less",
+    "plugins": ["less"],
+    "include": [{
+      "directory": "src",
+      "extensions": ["less"]
+    }],
+    "exclude": ["vendor/**/*.less"],
+    "outputPath": "styles/{relativePath:4}",
+    "sourceMapPath": "styles/{relativePath:4}"
+  }]
 }
 ```
 
 #### Usage
 
-The UCompiler CLI comes with two commands, `watch` and `go`.
-`go` If a file or folder or glob is provided, UCompiler will compile that, otherwise, it'll go through all the rules and compile them.
-`watch` Watches the file or folder provided and compiles them on change
+UCompiler has two valid CLI commands
 
-ToDo: Write rest of it
+ - `ucompiler go [rule]`
+ - `ucompiler watch [rule]`
 
 #### Plugin API
 
-The plugin package names must be in `ucompiler-plugin-{name}` format. While using them in `.ucompilerrc`, you can only use the name.
-UCompiler expects the plugin to export an object like the one shown below. It's process method will be invoked for the files using that plugin.
+The names of plugin package should start with `ucompiler-plugin-`. However you can drop that part in your
+configuration file. The plugin interface is written below. If you don't want to perform any customizations
+on the string, simply return null from your package.
 
 ```js
+type UCompilerJob = shape {
+  rootDirectory: string,
+  filePath: string,
+  state: Object,
+  config: Object
+}
+
+type UCompilerResult = shape {
+  contents: string,
+  sourceMap?: ?{
+    sources: Array<string>,
+    sourcesContent: Array<string>,
+    mappings: string,
+    names: Array<string>
+  }
+}
+
 module.exports = {
-  compiler: false,
-  minifier: false,
-  process: function(contents, {root, relativePath, absolutePath, fileName}, {state, config}): String | Promise<String>
+  compiler: boolean,
+  minifier: boolean,
+  process: function(contents: string, parameters: UCompilerJob): UCompilerResult | Promise<UCompilerResult>
 }
 ```
 

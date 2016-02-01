@@ -1,67 +1,136 @@
 'use babel'
 
+/* @flow */
+
 import Path from 'path'
 import FS from 'fs'
 import isGlob from 'is-glob'
 import {isMatch} from 'micromatch'
+import type {Stats} from 'fs'
+import mkdirp from 'mkdirp'
 
-export const isWindows = process.platform === 'win32'
-const NormalizationRegExp = /\\/g
+export const R_OK = 4
+export const W_OK = 2
+export const NormalizationRegExp = /\\/g
+export const FindCache: Map<string, string> = new Map()
 
-export function getDir(path) {
-  let stat
+// TODO: Put these file system helpers to a node module
 
-  try {
-    stat = FS.statSync(path)
-  } catch (_) {
-    throw new Error(`Error reading ${path}`)
-  }
-
-  if (stat.isFile()) {
-    return Path.dirname(path)
-  } else if (stat.isDirectory()) {
-    return path
-  } else {
-    throw new Error(`${path} is neither a file nor a directory`)
-  }
+export function stat(path: string): Promise<Stats> {
+  return new Promise(function(resolve, reject) {
+    FS.lstat(path, function(error, stats) {
+      if (error) {
+        reject(error)
+      } else resolve(stats)
+    })
+  })
 }
 
-export function findFile(root, fileName) {
-  try {
-    FS.accessSync(root, FS.R_OK)
-  } catch (_) {
-    throw new Error(`Can not read directory ${root}`)
+export function readdir(path: string): Promise<Array<string>> {
+  return new Promise(function(resolve, reject) {
+    FS.readdir(path, function(error, entries) {
+      if (error) {
+        reject(error)
+      } else resolve(entries)
+    })
+  })
+}
+
+export function read(path: string): Promise<string> {
+  return new Promise(function(resolve, reject) {
+    FS.readFile(path, function(error, contents) {
+      if (error) {
+        reject(error)
+      } else resolve(contents.toString())
+    })
+  })
+}
+
+export function write(path: string, contents: string): Promise {
+  return new Promise(function writeFile(resolve, reject, retry = true) {
+    FS.writeFile(path, contents, function(error) {
+      if (error) {
+        if (error.code === 'ENOENT' && retry) {
+          mkdirp(Path.dirname(path), function(error) {
+            if (error) {
+              reject(error)
+            } else writeFile(resolve, reject, false)
+          })
+        } else reject(error)
+      } else resolve()
+    })
+  })
+}
+
+export function exists(path: string): Promise<boolean> {
+  return new Promise(function(resolve) {
+    FS.access(path, function(error) {
+      resolve(error === null)
+    })
+  })
+}
+
+export async function find(rootDirectory: string, fileName: string): Promise<?string> {
+  if (!await exists(rootDirectory)) {
+    throw new Error(`Can not read directory ${rootDirectory}`)
   }
 
-  const chunks = root.split(Path.sep)
+  const chunks = rootDirectory.split(Path.sep)
   while (chunks.length) {
     const filePath = Path.join(chunks.join(Path.sep), fileName)
     if (filePath === fileName) {
       break
     }
-    try {
-      FS.accessSync(filePath, FS.R_OK)
+    if (await exists(filePath)) {
       return filePath
-    } catch (_) {}
+    }
     chunks.pop()
   }
   return null
 }
 
-export function isIgnored(name, path, ignored) {
-  return ignored.some(function(entry) {
-    if (isGlob(entry)) {
-      return isMatch(name, entry) || isMatch(path, entry)
-    } else {
-      return name === entry || path === entry
+export async function findCached(rootDirectory: string, fileName: string): Promise<?string> {
+  const cacheKey = rootDirectory + ':' + fileName
+  const cachedFilePath = FindCache.get(cacheKey)
+
+  if (cachedFilePath) {
+    if (await exists(cachedFilePath)) {
+      return cachedFilePath
     }
+    FindCache.delete(cacheKey)
+  }
+  const filePath = await find(rootDirectory, fileName)
+  if (filePath) {
+    FindCache.set(cacheKey, filePath)
+  }
+  return filePath
+}
+
+export function isExcluded(fileNames: Array<string> , ignored: Array<string>): boolean {
+  return ignored.some(function(entry) {
+    const entryIsGlob = isGlob(entry)
+    for (const fileName of fileNames) {
+      if (entryIsGlob ? isMatch(fileName, entry) : fileName === entry) {
+        return true
+      }
+    }
+    return false
   })
 }
 
-export function normalizePath(path) {
-  if (isWindows) {
+export function normalizePath(path: string): string {
+  if (process.platform === 'win32') {
     return path.replace(NormalizationRegExp, '/')
-  } else {
-    return path
   }
+  return path
+}
+
+export function asyncReduce<TItem, TValue>(items: Array<TItem>, initialValue: TValue, callback:((item: TItem, value: TValue) => Promise<TValue>)): Promise<TValue> {
+  return items.reduce(function(promise, item) {
+    return promise.then(function(previousResult) {
+      return callback(item, previousResult)
+    })
+  }, new Promise(function(resolve) {
+    resolve(initialValue)
+  }))
 }

@@ -1,34 +1,46 @@
 'use babel'
 
-import {transfer} from 'multi-stage-sourcemap'
+/* @flow */
 
-export function execute(plugins, contents, paths, meta) {
-  // Sequence:
-  // 1. Compilers
-  // 2. General
-  // 3. Minifiers
-  let lastMap = meta.state.sourceMap
-  return []
+import {transfer} from 'multi-stage-sourcemap'
+import {asyncReduce} from './common'
+import type {UCompiler$Job, Ucompiler$Plugins, UCompiler$Plugin$Result, UCompiler$SourceMap} from '../types'
+
+export async function execute(
+  plugins: Ucompiler$Plugins,
+  contents: string,
+  job: UCompiler$Job
+): Promise<UCompiler$Plugin$Result> {
+
+  const sortedPlugins = []
     .concat(plugins.compilers)
     .concat(plugins.general)
     .concat(plugins.minifiers)
-    .reduce(function(promise, plugin) {
-      return promise.then(function(contents) {
-        if (lastMap && meta.state.sourceMap !== lastMap) {
-          sourceMapDiff(meta.state, lastMap)
-        }
-        lastMap = meta.state.sourceMap
-        return plugin.process(contents, paths, meta)
-      })
-    }, Promise.resolve(contents)).then(function(contents) {
-      if (lastMap && meta.state.sourceMap !== lastMap) {
-        sourceMapDiff(meta.state, lastMap)
+
+  return await asyncReduce(sortedPlugins, {
+    contents: contents,
+    sourceMap: null
+  }, async function(plugin, previousResult) {
+    const result = await plugin.process(previousResult.contents, job)
+
+    if (result) {
+      if (result.sourceMap && previousResult.sourceMap) {
+        result.sourceMap = reverseSourceMap(result.sourceMap, previousResult.sourceMap)
+      } else if (previousResult.sourceMap) {
+        result.sourceMap = previousResult.sourceMap
       }
-      return contents
-    })
+      return result
+    }
+
+    return previousResult
+  })
 }
 
-function sourceMapDiff(state, lastMap) {
-  state.sourceMap = JSON.parse(transfer({fromSourceMap: state.sourceMap, toSourceMap: lastMap}))
-  state.sourceMap.sourcesContent = lastMap.sourcesContent
+export function reverseSourceMap(
+  newSourceMap: UCompiler$SourceMap,
+  oldSourceMap: UCompiler$SourceMap
+): UCompiler$SourceMap {
+  const merged = JSON.parse(transfer({fromSourceMap: newSourceMap, toSourceMap: oldSourceMap}))
+  merged.sourcesContent = oldSourceMap.sourcesContent
+  return merged
 }

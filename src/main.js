@@ -1,67 +1,103 @@
 'use babel'
 
+/* @flow */
+
 import Path from 'path'
 import FS from 'fs'
-import * as Chokidar from 'chokidar'
+import Chokidar from 'chokidar'
 import {Disposable} from 'sb-event-kit'
+import {read} from './helpers/common'
 import {findRoot} from './helpers/find-root'
-import {findFiles} from './helpers/find-files'
+import {scanFiles} from './helpers/scan-files'
 import {getConfig} from './helpers/get-config'
-import {getRules} from './helpers/get-rules'
 import {getPlugins} from './helpers/get-plugins'
-import {saveFile} from './helpers/save-file'
 import {execute} from './helpers/execute'
+import {fromObject} from './helpers/source-map'
+import {saveFile} from './helpers/save-file'
+import type {Ucompiler$Compile$Results, Ucompiler$Compile$Result, Ucompiler$Config$Rule} from './types'
 
-export function compile(path = null, options = {}, errorCallback = null) {
-  options = Object.assign({
-    ignored: [],
-    root: null,
-    cwd: null,
-    config: {}
-  }, options)
+export async function compile(
+  directory: string,
+  ruleName:?string = null,
+  errorCallback: ((error: Error) => void) = function(e) { throw e },
+  saveContents: boolean = true
+): Promise<Ucompiler$Compile$Results> {
+  const rootDirectory = await findRoot(directory)
+  const {rule: config} = await getConfig(rootDirectory, ruleName)
+  const files = await scanFiles(rootDirectory, config)
 
-  const root = findRoot(path, options)
-  const config = Object.assign({}, options.config, getConfig(root))
-  const files = findFiles(path, options.ignored, {root, config, cwd: options.cwd})
-  let results = {status: true, contents: {}}
+  const toReturn = {
+    status: true,
+    contents: [],
+    sourceMaps: [],
+    state: []
+  }
 
-  return Promise.all(files.map(function({relativePath, absolutePath, fileName}) {
-    const localConfig = getRules(relativePath, config)
-    const plugins = getPlugins(root, localConfig)
-    const contents = FS.readFileSync(absolutePath, {encoding: 'utf8'})
-    const state = {sourceMap: null, imports: [], ext: Path.extname(fileName).slice(1)}
-    const paths = {root, relativePath, absolutePath, fileName}
-
-    return execute(plugins, contents, paths, {state, config: localConfig}).then(function(newContents) {
-      return saveFile(newContents, localConfig, paths, state)
-    }).then(function(result) {
-      results.contents[absolutePath] = result
-    }, function(error) {
-      results.status = false
-      if (typeof errorCallback === 'function') {
-        errorCallback(error)
-      }
-      results.contents[absolutePath] = null
-    })
-  })).then(function() {
-    return results
+  const promises = files.map(filePath => {
+    return compileFile(rootDirectory, filePath, config, { imports: [] }).catch(errorCallback)
   })
-}
 
-export function watch(path, options = {}, errorCallback = null) {
-  options = Object.assign({
-    cwd: process.cwd()
-  }, options)
+  const results = await Promise.all(promises)
+  for (const result of results) {
+    if (!result) {
+      toReturn.status = false
+      continue
+    }
 
-  const watcher = Chokidar.watch(path)
+    toReturn.contents.push(result.contents)
+    toReturn.sourceMaps.push(result.sourceMap)
+    toReturn.state.push(result.state)
 
-  function onChange(path) {
-    const promise = compile(path, options, errorCallback)
-    if (typeof errorCallback === 'function') {
-      promise.catch(errorCallback)
+    if (saveContents) {
+      await saveFile(rootDirectory, result, config)
     }
   }
 
+  return toReturn
+}
+
+export async function compileFile(
+  rootDirectory: string,
+  filePath: string,
+  config: Ucompiler$Config$Rule,
+  state: Object
+): Promise<Ucompiler$Compile$Result> {
+  const fileContents = await read(filePath)
+
+  const plugins = await getPlugins(rootDirectory, config)
+  const result = await execute(plugins, fileContents, {
+    rootDirectory: rootDirectory,
+    filePath: filePath,
+    state: state,
+    config: config
+  })
+
+  return {
+    filePath: filePath,
+    contents: result.contents,
+    sourceMap: result.sourceMap ? fromObject(rootDirectory, filePath, result.sourceMap) : null,
+    state: state
+  }
+}
+
+export async function watch(
+  directory: string,
+  ruleName: string,
+  errorCallback: ((error: Error) => void) = function(e) { console.error(e.stack) }
+): Promise {
+  const rootDirectory = await findRoot(directory)
+  const {rule: config} = await getConfig(rootDirectory, ruleName)
+  const targetDirectories = config.include.map(function(entry) {
+    return Path.join(rootDirectory, entry.directory)
+  })
+
+  function onChange(filePath) {
+    compileFile(rootDirectory, filePath, config, { imports: [] }).then(function(result) {
+      saveFile(rootDirectory, result, config)
+    }).catch(errorCallback)
+  }
+
+  const watcher = Chokidar.watch(targetDirectories)
   watcher.on('change', onChange)
   watcher.on('add', onChange)
 

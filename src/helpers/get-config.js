@@ -1,22 +1,39 @@
 'use babel'
 
-import FS from 'fs'
+/* @flow */
+
 import Path from 'path'
-import {DEFAULT_CONFIG, CONFIG_FILE_NAME} from '../defaults'
+import type {Ucompiler$Config, Ucompiler$Config$Rule} from '../types'
+import {read} from './common'
+import {CONFIG_FILE_NAME} from '../defaults'
 
-export function getConfig(root) {
-  const configPath = Path.join(root, CONFIG_FILE_NAME)
+export async function getConfig(directory: string, ruleName: ?string): Promise<{
+  config: Ucompiler$Config,
+  rule: Ucompiler$Config$Rule
+}> {
+  const configPath = Path.join(directory, CONFIG_FILE_NAME)
+  let config
+  let rule
 
-  let config = Object.assign({}, DEFAULT_CONFIG)
   try {
-    FS.accessSync(configPath, FS.R_OK)
-    const contents = FS.readFileSync(configPath)
-    try {
-      Object.assign(config, JSON.parse(contents))
-    } catch (_) {
-      throw new Error(`Malformed configuration file located at ${configPath}`)
-    }
-  } catch (_) {}
+    config = JSON.parse(await read(configPath))
+  } catch (_) {
+    throw new Error(`Malformed JSON configuration found at ${configPath}`)
+  }
 
-  return config
+  if (ruleName === null) {
+    ruleName = config.defaultRule
+  }
+  for (const ruleEntry of config.rules) {
+    if (ruleEntry.name === ruleName) {
+      rule = ruleEntry
+      break
+    }
+  }
+
+  if (!rule) {
+    throw new Error(`Rule '${ruleName}' not found in config ${configPath}`)
+  }
+
+  return {config, rule}
 }
