@@ -25,6 +25,7 @@ export async function compile(
   const rootDirectory = await findRoot(directory)
   const {rule: config} = await getConfig(rootDirectory, ruleName)
   const files = await scanFiles(rootDirectory, config)
+  let promises = []
 
   const toReturn = {
     status: true,
@@ -33,25 +34,18 @@ export async function compile(
     state: []
   }
 
-  const promises = files.map(filePath => {
-    return compileFile(rootDirectory, filePath, config, { imports: [] }).catch(errorCallback)
+  promises = files.map(filePath => {
+    return compileFile(rootDirectory, filePath, config).then(function(result) {
+      toReturn.contents.push({path: filePath, contents: result.contents})
+      toReturn.sourceMaps.push({path: filePath, contents: result.sourceMap})
+      toReturn.state.push({path: filePath, state: result.state})
+    }, function(e) {
+      toReturn.status = false
+      errorCallback(e)
+    })
   })
 
-  const results = await Promise.all(promises)
-  for (const result of results) {
-    if (!result) {
-      toReturn.status = false
-      continue
-    }
-
-    toReturn.contents.push(result.contents)
-    toReturn.sourceMaps.push(result.sourceMap)
-    toReturn.state.push(result.state)
-
-    if (saveContents) {
-      await saveFile(rootDirectory, result, config)
-    }
-  }
+  await Promise.all(promises)
 
   return toReturn
 }
@@ -59,10 +53,10 @@ export async function compile(
 export async function compileFile(
   rootDirectory: string,
   filePath: string,
-  config: Ucompiler$Config$Rule,
-  state: Object
+  config: Ucompiler$Config$Rule
 ): Promise<Ucompiler$Compile$Result> {
   const fileContents = await read(filePath)
+  const state = {imports: []}
 
   const plugins = await getPlugins(rootDirectory, config)
   const result = await execute(plugins, fileContents, {
