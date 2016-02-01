@@ -1,5 +1,5 @@
 [ignore]
-/node_modules
+.*/node_modules/*
 
 [include]
 
@@ -7,3 +7,4 @@
 
 [options]
 module.system=node
+suppress_comment= \\(.\\|\n\\)*\\$FlowIgnore
