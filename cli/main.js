@@ -14,14 +14,17 @@ if (!parameters.length || knownCommands.indexOf(parameters[0]) === -1) {
 
 if (parameters[0] === 'go') {
   UCompiler.compile(process.cwd(), parameters[1] || null, function(e) {
-    console.error(e)
+    console.error(e.stack)
   }).then(function(result) {
     if (!result.status) {
       process.exit(1)
     }
+  }, function(e) {
+    console.error(e.stack)
+    process.exit(1)
   })
 } else if (parameters[0] === 'watch') {
   UCompiler.watch(process.cwd(), parameters[1] || null, function(e) {
-    console.error(e)
+    console.error(e.stack)
   })
 }
