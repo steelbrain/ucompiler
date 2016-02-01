@@ -1,3 +1,7 @@
+#### Upcoming
+
+* Stricter plugin result validation
+
 #### 3.0.1
 
 * Fix source map resolution for compilers that concat files
