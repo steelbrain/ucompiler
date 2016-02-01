@@ -1,5 +1,8 @@
-#### Upcoming
+#### 3.0.0
 
+* Complete rewrite
+* Support rule based compilations
+* Simplify plugin API
 * Automatically create target directories
 
 #### 2.1.3
