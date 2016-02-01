@@ -6,61 +6,34 @@ import Path from 'path'
 import FS from 'fs'
 import isGlob from 'is-glob'
 import {isMatch} from 'micromatch'
-import type {Stats} from 'fs'
 import mkdirp from 'mkdirp'
+import promisify from 'sb-promisify'
+import type {Stats} from 'fs'
 
 export const R_OK = 4
 export const W_OK = 2
 export const NormalizationRegExp = /\\/g
 export const FindCache: Map<string, string> = new Map()
 
-// TODO: Put these file system helpers to a node module
-
-export function stat(path: string): Promise<Stats> {
-  return new Promise(function(resolve, reject) {
-    FS.lstat(path, function(error, stats) {
-      if (error) {
-        reject(error)
-      } else resolve(stats)
-    })
-  })
-}
-
-export function readdir(path: string): Promise<Array<string>> {
-  return new Promise(function(resolve, reject) {
-    FS.readdir(path, function(error, entries) {
-      if (error) {
-        reject(error)
-      } else resolve(entries)
-    })
-  })
-}
-
-export function read(path: string): Promise<string> {
-  return new Promise(function(resolve, reject) {
-    FS.readFile(path, function(error, contents) {
-      if (error) {
-        reject(error)
-      } else resolve(contents.toString())
-    })
-  })
-}
-
+export const stat: ((filePath: string) => Promise<Stats>) = promisify(FS.lstat)
+export const readdir: ((dirPath: string) => Promise<Array<string>>) = promisify(FS.readdir)
+export const read: ((filePath: string) => Promise<string>) = promisify(FS.read)
 export function write(path: string, contents: string): Promise {
-  return new Promise(function writeFile(resolve, reject, retry = true) {
-    FS.writeFile(path, contents, function(error) {
-      if (error) {
-        if (error.code === 'ENOENT' && retry) {
-          mkdirp(Path.dirname(path), function(error) {
-            if (error) {
-              reject(error)
-            } else writeFile(resolve, reject, false)
-          })
-        } else reject(error)
-      } else resolve()
-    })
-  })
+ return new Promise(function writeFile(resolve, reject, retry = true) {
+   FS.writeFile(path, contents, function(error) {
+     if (error) {
+       if (error.code === 'ENOENT' && retry) {
+         mkdirp(Path.dirname(path), function(error) {
+           if (error) {
+             reject(error)
+           } else writeFile(resolve, reject, false)
+         })
+       } else reject(error)
+     } else resolve()
+   })
+ })
 }
+
 
 export function exists(path: string): Promise<boolean> {
   return new Promise(function(resolve) {
