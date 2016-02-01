@@ -15,6 +15,12 @@ export async function getPlugins(rootDirectory: string, config: Ucompiler$Config
 
   for (const pluginName of config.plugins) {
     const plugin = await getPlugin(rootDirectory, pluginName)
+
+    if (typeof plugin !== 'object') {
+      throw new Error(`Plugin '${pluginName}' is invalid`)
+    }
+    plugin.name = pluginName
+
     if (plugin.compiler) {
       plugins.compilers.push(plugin)
     } else if (plugin.minifier) {

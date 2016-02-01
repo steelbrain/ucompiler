@@ -9,6 +9,7 @@ export type Ucompiler$Plugins = {
 }
 
 export type UCompiler$Plugin = {
+  name: string,
   compiler: boolean,
   minifier: boolean,
   process: ((contents:string, parameters: UCompiler$Job) => ?UCompiler$Plugin$Result)
