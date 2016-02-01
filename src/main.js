@@ -4,6 +4,7 @@
 
 import Path from 'path'
 import FS from 'fs'
+import Chokidar from 'chokidar'
 import {Disposable} from 'sb-event-kit'
 import {read} from './helpers/common'
 import {findRoot} from './helpers/find-root'
@@ -77,4 +78,30 @@ export async function compileFile(
     sourceMap: result.sourceMap ? fromObject(rootDirectory, filePath, result.sourceMap) : null,
     state: state
   }
+}
+
+export async function watch(
+  directory: string,
+  ruleName: string,
+  errorCallback: ((error: Error) => void) = function(e) { console.error(e.stack) }
+): Promise {
+  const rootDirectory = await findRoot(directory)
+  const {rule: config} = await getConfig(rootDirectory, ruleName)
+  const targetDirectories = config.include.map(function(entry) {
+    return Path.join(rootDirectory, entry.directory)
+  })
+
+  function onChange(filePath) {
+    compileFile(rootDirectory, filePath, config, { imports: [] }).then(function(result) {
+      saveFile(rootDirectory, result, config)
+    }).catch(errorCallback)
+  }
+
+  const watcher = Chokidar.watch(targetDirectories)
+  watcher.on('change', onChange)
+  watcher.on('add', onChange)
+
+  return new Disposable(function() {
+    watcher.close()
+  })
 }
