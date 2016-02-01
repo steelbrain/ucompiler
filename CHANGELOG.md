@@ -1,3 +1,8 @@
+#### 3.0.1
+
+* Fix source map resolution for compilers that concat files
+* Show internal errors via cli
+
 #### 3.0.0
 
 * Complete rewrite
