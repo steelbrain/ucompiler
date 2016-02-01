@@ -111,6 +111,7 @@ export async function watch(
   let initialized = false
 
   function localCompileFile(filePath) {
+    // TODO: Check if the file's extension is valid and is not in ignored
     compileFile(rootDirectory, filePath, config).then(function(result) {
       imports.set(filePath, result.state.imports)
       if (initialized) {
