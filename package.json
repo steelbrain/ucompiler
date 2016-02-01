@@ -22,9 +22,10 @@
     "is-glob": "^2.0.1",
     "micromatch": "^2.3.5",
     "mkdirp": "^0.5.1",
+    "multi-stage-sourcemap": "^0.2.1",
     "sb-event-kit": "^1.0.2",
-    "string-templates": "^1.0.6",
-    "multi-stage-sourcemap": "^0.2.1"
+    "sb-promisify": "^1.0.0",
+    "string-templates": "^1.0.6"
   },
   "devDependencies": {
     "babel-preset-steelbrain": "^1.0.0"
