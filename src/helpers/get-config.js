@@ -8,8 +8,8 @@ import {read} from './common'
 import {CONFIG_FILE_NAME} from '../defaults'
 
 export async function getConfig(directory: string, ruleName: ?string): Promise<{
-  config: Ucompiler$Config,
-  rule: Ucompiler$Config$Rule
+  global: Ucompiler$Config,
+  config: Ucompiler$Config$Rule
 }> {
   const configPath = Path.join(directory, CONFIG_FILE_NAME)
   let config
@@ -35,5 +35,8 @@ export async function getConfig(directory: string, ruleName: ?string): Promise<{
     throw new Error(`Rule '${ruleName}' not found in config ${configPath}`)
   }
 
-  return {config, rule}
+  return {
+    global: config,
+    config: rule
+  }
 }
