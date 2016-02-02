@@ -2,13 +2,10 @@
 
 /* @flow */
 
-import Path from 'path'
-import FS from 'fs'
-import Chokidar from 'chokidar'
 import {Disposable} from 'sb-event-kit'
 import {findRoot} from './helpers/find-root'
 import {scanFiles} from './helpers/scan-files'
-import {getConfig} from './helpers/get-config'
+import {getConfig, getConfigRule} from './helpers/get-config'
 import {saveFile} from './helpers/save-file'
 import {getParents} from './helpers/get-parents'
 import {compileFile} from './helpers/compile-file'
@@ -20,10 +17,10 @@ import type {EventKit$Disposable} from './types-external'
 export async function compile(
   directory: string,
   options: UCompiler$Options,
-  ruleName:?string = null,
+  ruleName:?string = null
 ): Promise<Ucompiler$Compile$Results> {
   const rootDirectory = await findRoot(directory)
-  const {config} = await getConfig(rootDirectory, ruleName)
+  const config = getConfigRule(await getConfig(rootDirectory), ruleName)
   const files = await scanFiles(rootDirectory, config)
   let promises
 
