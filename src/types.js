@@ -74,3 +74,10 @@ export type Ucompiler$Compile$Result = {
   sourceMap: ?string,
   state: Object
 }
+
+export type UCompiler$ErrorCallback = ((error: Error) => void)
+export type UCompiler$Options = {
+  save: boolean,
+  saveIncludedFiles: boolean,
+  errorCallback: UCompiler$ErrorCallback
+}
