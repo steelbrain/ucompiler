@@ -58,7 +58,7 @@ export class Watcher {
     }))
   }
   dispose() {
-
+    this.subscriptions.dispose()
   }
 
   static async create(
