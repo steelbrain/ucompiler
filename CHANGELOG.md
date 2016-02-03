@@ -1,4 +1,4 @@
-#### Upcoming
+#### 3.1.5
 
 * Stricter rule path validation in watcher
 * Add source map signatures to css and js files
