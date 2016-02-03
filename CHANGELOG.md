@@ -1,3 +1,9 @@
+#### 3.1.2
+
+* Hopefully support windows path separator
+* Fix a potential bug in cli where invalid errors won't be handled properly
+* Fix a bug with sourceMap resolver where it won't resolve properly if oldSourceMap wasn't set
+
 #### 3.1.1
 
 * Fix a bug where files imported in other files will be accidently compiled
