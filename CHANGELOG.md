@@ -1,3 +1,7 @@
+#### Upcoming
+
+* Fix a file-specific deadlock in watcher after an error was encountered
+
 #### 3.1.5
 
 * Stricter rule path validation in watcher
