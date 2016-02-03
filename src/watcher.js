@@ -50,7 +50,10 @@ export class Watcher {
   activate() {
     const watcher = Chokidar.watch([])
     const watcherCallback = (filePath, stats) => {
-      const promise = this.handleChange(filePath, stats).catch(this.options.errorCallback)
+      const promise = this.handleChange(filePath, stats).catch(_ => {
+        this.options.errorCallback(_)
+        this.locks.delete(filePath)
+      })
       if (!this.watcherReady) {
         this.activationPromises.push(promise)
       }
