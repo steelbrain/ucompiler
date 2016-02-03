@@ -39,7 +39,7 @@ export class Watcher {
     this.rootDirectory = rootDirectory
     this.config = config
     this.options = options
-    this.ruleNames = ruleNames.length ? ruleNames : [config.defaultRule]
+    this.ruleNames = ruleNames.length ? ruleNames : config.rules.map(r => r.name)
     this.subscriptions = new CompositeDisposable()
     this.imports = new Map()
     this.results = new Map()

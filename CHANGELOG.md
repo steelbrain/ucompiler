@@ -1,3 +1,7 @@
+#### 3.1.4
+
+* Execute all rules by default in watcher
+
 #### 3.1.3
 
 * Add `preprocessor` priority, used by ucompiler-plugin-rollup
