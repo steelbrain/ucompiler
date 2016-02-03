@@ -3,16 +3,20 @@
 /* @flow */
 
 import Path from 'path'
-import debug from 'debug'
 import Chokidar from 'chokidar'
 import {CompositeDisposable, Disposable} from 'sb-event-kit'
+import {stat} from './helpers/common'
 import {findRoot} from './helpers/find-root'
 import {getConfig, getConfigRule} from './helpers/get-config'
 import {validateNode} from './helpers/scan-files'
 import {compileFile} from './helpers/compile-file'
+import {getParents} from './helpers/get-parents'
+import {saveFile} from './helpers/save-file'
 import type {Stats} from 'fs'
-import type {UCompiler$Options, Ucompiler$Config, Ucompiler$Compile$Result} from './types'
+import type {UCompiler$Options, Ucompiler$Config, Ucompiler$Compile$Result, Ucompiler$Config$Rule} from './types'
 import type {Chokidar$Watcher, EventKit$CompositeDisposable} from './types-external'
+
+const debug = require('debug')('UCompiler:Watcher')
 
 export class Watcher {
   rootDirectory: string;
@@ -21,12 +25,10 @@ export class Watcher {
   ruleNames: Array<string>;
   subscriptions: EventKit$CompositeDisposable;
   imports: Map<string, Array<string>>;
+  results: Map<string, Ucompiler$Compile$Result>;
   locks: Set<string>;
   watcherReady: boolean;
-  activation: {
-    promises: Array<Promise>,
-    results: Map<string, Ucompiler$Compile$Result>
-  };
+  activationPromises: Array<Promise>;
 
   constructor(
     rootDirectory:string,
@@ -40,17 +42,18 @@ export class Watcher {
     this.ruleNames = ruleNames.length ? ruleNames : [config.defaultRule]
     this.subscriptions = new CompositeDisposable()
     this.imports = new Map()
+    this.results = new Map()
     this.locks = new Set()
     this.watcherReady = false
-    this.activation = {
-      promises: [],
-      results: new Map()
-    }
+    this.activationPromises = []
   }
   activate() {
     const watcher = Chokidar.watch([])
-    const watcherCallback = filePath => {
-      console.log('watcher', filePath)
+    const watcherCallback = (filePath, stats) => {
+      const promise = this.handleChange(filePath, stats)
+      if (!this.watcherReady) {
+        this.activationPromises.push(promise)
+      }
     }
 
     for (const ruleName of this.ruleNames) {
@@ -60,11 +63,16 @@ export class Watcher {
       }
     }
 
-    watcher.on('add', (filePath, stats) => this.handleChange(filePath, stats))
-    watcher.on('change', (filePath, stats) => this.handleChange(filePath, stats))
+    watcher.on('add', watcherCallback)
+    watcher.on('change', watcherCallback)
     watcher.on('ready', () => {
-      this.watcherReady = true
-      console.log('ready')
+      Promise.all(this.activationPromises).then(() => {
+        this.watcherReady = true
+        debug('Initial scan complete')
+        for (const [filePath] of this.results) {
+          this.handleChange(filePath)
+        }
+      })
     })
 
     this.subscriptions.add(new Disposable(function() {
@@ -72,30 +80,56 @@ export class Watcher {
       watcher.close()
     }))
   }
-  async handleChange(filePath: string, stats: Stats): Promise {
+  async handleChange(filePath: string, stats: ?Stats = null): Promise {
+    if (this.locks.has(filePath)) {
+      return
+    }
+    if (!stats) {
+      stats = await stat(filePath)
+    }
+    const watcherReady = this.watcherReady
     for (const ruleName of this.ruleNames) {
       const config = getConfigRule(this.config, ruleName)
       for (const rule of config.include) {
         const ruleDirectory = Path.join(this.rootDirectory, rule.directory)
         if (filePath.indexOf(ruleDirectory) === 0 && validateNode(
-          this.rootDirectory, filePath, config.exclude || [], rule.extensions, stats, false
+          this.rootDirectory, filePath, config.exclude || [], rule.extensions, stats, true
         )) {
           this.locks.add(filePath)
           const result = await compileFile(this.rootDirectory, filePath, config)
+          this.imports.set(filePath, result.state.imports)
+          this.results.set(filePath, result)
+          if (watcherReady) {
+            await this.writeFile(filePath, result, config)
+          }
           this.locks.delete(filePath)
-
-          console.log(result)
           break
         }
       }
+    }
+  }
+  async writeFile(
+    filePath: string,
+    result: Ucompiler$Compile$Result,
+    config: Ucompiler$Config$Rule
+  ): Promise {
+    if (!this.options.save) {
+      return
+    }
+    const parents = getParents(this.imports, filePath)
+    if (!parents.length || this.options.saveIncludedFiles) {
+      await saveFile(this.rootDirectory, result, config)
+    }
+    for (const parent of parents) {
+      this.handleChange(parent)
     }
   }
   dispose() {
     this.subscriptions.dispose()
     this.imports.clear()
     this.locks.clear()
-    this.activation.promises = []
-    this.activation.results.clear()
+    this.results.clear()
+    this.activationPromises = []
   }
 
   static async create(
