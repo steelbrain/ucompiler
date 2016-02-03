@@ -29,5 +29,13 @@ if (parameters[0] === 'go') {
     process.exit(1)
   })
 } else if (parameters[0] === 'watch') {
-  UCompiler.watch(process.cwd(), options, parameters[1] ? [parameters[1]] : []).catch(e => console.log(e.stack))
+  UCompiler.watch(
+    process.cwd(),
+    options,
+    parameters[1] ?
+      parameters[1]
+        .split(',')
+        .map(function(_) { return _.trim()})
+        .filter(function(_) { return _}) : parameters[1]
+  ).catch(e => console.log(e.stack))
 }
