@@ -1,3 +1,7 @@
+#### Upcoming
+
+* Stricter rule path validation in watcher
+
 #### 3.1.4
 
 * Execute all rules by default in watcher

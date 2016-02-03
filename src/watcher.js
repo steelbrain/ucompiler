@@ -92,7 +92,7 @@ export class Watcher {
       const config = getConfigRule(this.config, ruleName)
       for (const rule of config.include) {
         const ruleDirectory = Path.join(this.rootDirectory, rule.directory)
-        if (filePath.indexOf(ruleDirectory) === 0 && validateNode(
+        if (filePath.indexOf(ruleDirectory + Path.sep) === 0 && validateNode(
           this.rootDirectory, filePath, config.exclude || [], rule.extensions, stats, true
         )) {
           this.locks.add(filePath)
