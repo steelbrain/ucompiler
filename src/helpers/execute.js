@@ -44,7 +44,7 @@ export function reverseSourceMap(
   newSourceMap: UCompiler$SourceMap,
   oldSourceMap: UCompiler$SourceMap
 ): UCompiler$SourceMap {
-  if (oldSourceMap || newSourceMap.sourcesContent.length <= oldSourceMap.sourcesContent.length) {
+  if (!oldSourceMap || newSourceMap.sourcesContent.length <= oldSourceMap.sourcesContent.length) {
     const merged = JSON.parse(transfer({fromSourceMap: newSourceMap, toSourceMap: oldSourceMap}))
     merged.sourcesContent = oldSourceMap.sourcesContent
     return merged

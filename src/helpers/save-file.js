@@ -3,7 +3,7 @@
 /* @flow */
 
 import Path from 'path'
-import {write} from './common'
+import {write, unnormalizePath} from './common'
 import {template} from '../defaults'
 import type {Ucompiler$Compile$Result, Ucompiler$Config$Rule} from '../types'
 
@@ -52,5 +52,5 @@ export function renderPath(
   if (rendered.indexOf(':') !== -1 || rendered.indexOf('{') !== -1) {
     throw new Error(`Invalid output template '${templateString}' provided for '${result.filePath}'`)
   }
-  return rendered
+  return unnormalizePath(rendered)
 }

@@ -12,7 +12,6 @@ import type {Stats} from 'fs'
 
 export const R_OK = 4
 export const W_OK = 2
-export const NormalizationRegExp = /\\/g
 export const FindCache: Map<string, string> = new Map()
 
 const readFile: ((filePath: string) => Promise<string>) = promisify(FS.readFile)
@@ -97,7 +96,14 @@ export function isExcluded(fileNames: Array<string> , ignored: Array<string>): b
 
 export function normalizePath(path: string): string {
   if (process.platform === 'win32') {
-    return path.replace(NormalizationRegExp, '/')
+    return path.replace(/\\/g, '/')
+  }
+  return path
+}
+
+export function unnormalizePath(path: string): string {
+  if (process.platform === 'win32') {
+    return path.replace(/\//g, '\\')
   }
   return path
 }

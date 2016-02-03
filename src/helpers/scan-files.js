@@ -48,7 +48,7 @@ export async function scanFilesInDirectory(
   let promises = []
 
   for (const entry of contents) {
-    const entryPath = normalizePath(Path.join(directory, entry))
+    const entryPath = Path.join(directory, entry)
     const entryStats = await stat(entryPath)
 
     if (validateNode(rootDirectory, entryPath, excluded, extensions, entryStats, deep)) {
@@ -78,7 +78,7 @@ export function validateNode(
 ): boolean {
   const entryRelativePath = normalizePath(Path.relative(rootDirectory, entryPath))
 
-  if (isExcluded([entryRelativePath, entryPath, Path.basename(entryPath)], excluded)) {
+  if (isExcluded([entryRelativePath, normalizePath(entryPath), normalizePath(Path.basename(entryPath))], excluded)) {
     return false
   }
 

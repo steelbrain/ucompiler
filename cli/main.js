@@ -16,7 +16,7 @@ const options = {
   save: true,
   saveIncludedFiles: false,
   errorCallback: function(e) {
-    console.log(e.stack)
+    console.log(e.stack || e)
   }
 }
 if (parameters[0] === 'go') {
@@ -25,7 +25,7 @@ if (parameters[0] === 'go') {
       process.exit(1)
     }
   }, function(e) {
-    console.error(e.stack)
+    options.errorCallback(e)
     process.exit(1)
   })
 } else if (parameters[0] === 'watch') {
@@ -37,5 +37,5 @@ if (parameters[0] === 'go') {
         .split(',')
         .map(function(_) { return _.trim()})
         .filter(function(_) { return _}) : parameters[1]
-  ).catch(e => console.log(e.stack))
+  ).catch(options.errorCallback)
 }

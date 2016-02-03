@@ -28,6 +28,8 @@
     "string-templates": "^1.0.6"
   },
   "devDependencies": {
-    "babel-preset-steelbrain": "^1.0.0"
+    "babel-preset-steelbrain": "^1.0.0",
+    "babel-preset-steelbrain-flow": "^1.0.1",
+    "babel-preset-steelbrain-async": "^1.0.1"
   }
 }
