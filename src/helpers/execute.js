@@ -13,6 +13,7 @@ export async function execute(
 ): Promise<UCompiler$Plugin$Result> {
 
   const sortedPlugins = []
+    .concat(plugins.preprocessors)
     .concat(plugins.compilers)
     .concat(plugins.general)
     .concat(plugins.minifiers)
@@ -21,7 +22,6 @@ export async function execute(
     contents: contents,
     sourceMap: null
   }, async function(plugin, previousResult) {
-    // $FlowIgnore: I don't know why flow doesn't like this?
     const result = await plugin.process(previousResult.contents, job)
 
     if (result) {

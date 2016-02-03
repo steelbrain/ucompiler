@@ -1,3 +1,7 @@
+#### 3.1.3
+
+* Add `preprocessor` priority, used by ucompiler-plugin-rollup
+
 #### 3.1.2
 
 * Hopefully support windows path separator

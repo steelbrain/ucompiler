@@ -9,6 +9,7 @@ import type {Ucompiler$Plugins, UCompiler$Plugin, Ucompiler$Config$Rule} from '.
 export async function getPlugins(rootDirectory: string, config: Ucompiler$Config$Rule): Promise<Ucompiler$Plugins> {
   const plugins = {
     compilers: [],
+    preprocessors: [],
     general: [],
     minifiers: []
   }
@@ -25,6 +26,8 @@ export async function getPlugins(rootDirectory: string, config: Ucompiler$Config
       plugins.compilers.push(plugin)
     } else if (plugin.minifier) {
       plugins.minifiers.push(plugin)
+    } else if (plugin.preprocessor) {
+      plugins.preprocessors.push(plugin)
     } else {
       plugins.general.push(plugin)
     }
