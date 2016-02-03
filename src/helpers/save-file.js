@@ -5,6 +5,7 @@
 import Path from 'path'
 import {write, unnormalizePath} from './common'
 import {template} from '../defaults'
+import {addSignature} from './source-map'
 import type {Ucompiler$Compile$Result, Ucompiler$Config$Rule} from '../types'
 
 const debug = require('debug')('UCompiler:Save')
@@ -16,12 +17,15 @@ export async function saveFile(
 ): Promise {
   const outputPath = renderPath(rootDirectory, result, config, config.outputPath)
   debug(`Saving output of '${Path.relative(rootDirectory, result.filePath)}' to '${outputPath}'`)
-  await write(outputPath, result.contents)
 
   if (config.sourceMapPath && result.sourceMap) {
     const sourceMapPath = renderPath(rootDirectory, result, config, config.sourceMapPath)
     debug(`Saving sourcemap of '${Path.relative(rootDirectory, result.filePath)}' to '${sourceMapPath}'`)
+
+    await write(outputPath, addSignature(outputPath, sourceMapPath, result.contents))
     await write(sourceMapPath, String(result.sourceMap))
+  } else {
+    await write(outputPath, result.contents)
   }
 }
 
