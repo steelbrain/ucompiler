@@ -3,6 +3,7 @@
 /* @flow */
 
 export type Ucompiler$Plugins = {
+  preprocessors: Array<UCompiler$Plugin>,
   compilers: Array<UCompiler$Plugin>,
   general: Array<UCompiler$Plugin>,
   minifiers: Array<UCompiler$Plugin>
@@ -10,8 +11,9 @@ export type Ucompiler$Plugins = {
 
 export type UCompiler$Plugin = {
   name: string,
-  compiler: boolean,
-  minifier: boolean,
+  compiler: ?boolean,
+  minifier: ?boolean,
+  preprocessor: ?boolean,
   process: ((contents:string, parameters: UCompiler$Job) => ?UCompiler$Plugin$Result)
 }
 
