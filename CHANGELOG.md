@@ -1,3 +1,7 @@
+#### 3.1.1
+
+* Fix a bug where files imported in other files will be accidently compiled
+
 #### 3.1.0
 
 * Stricter plugin result validation
