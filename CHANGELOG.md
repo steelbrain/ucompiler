@@ -1,4 +1,4 @@
-#### Upcoming
+#### 3.1.6
 
 * Fix a file-specific deadlock in watcher after an error was encountered
 
