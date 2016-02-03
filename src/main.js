@@ -2,29 +2,27 @@
 
 /* @flow */
 
-import Path from 'path'
-import FS from 'fs'
-import Chokidar from 'chokidar'
 import {Disposable} from 'sb-event-kit'
-import {read} from './helpers/common'
 import {findRoot} from './helpers/find-root'
 import {scanFiles} from './helpers/scan-files'
-import {getConfig} from './helpers/get-config'
-import {getPlugins} from './helpers/get-plugins'
-import {execute} from './helpers/execute'
-import {fromObject} from './helpers/source-map'
+import {getConfig, getConfigRule} from './helpers/get-config'
 import {saveFile} from './helpers/save-file'
-import type {Ucompiler$Compile$Results, Ucompiler$Compile$Result, Ucompiler$Config$Rule} from './types'
+import {getParents} from './helpers/get-parents'
+import {compileFile} from './helpers/compile-file'
+import {Watcher} from './watcher'
+
+import type {Ucompiler$Compile$Results, Ucompiler$Compile$Result, Ucompiler$Config$Rule, UCompiler$Options} from './types'
+import type {EventKit$Disposable} from './types-external'
 
 export async function compile(
   directory: string,
-  ruleName:?string = null,
-  errorCallback: ((error: Error) => void) = function(e) { throw e },
-  saveContents: boolean = true
+  options: UCompiler$Options,
+  ruleName:?string = null
 ): Promise<Ucompiler$Compile$Results> {
   const rootDirectory = await findRoot(directory)
-  const {rule: config} = await getConfig(rootDirectory, ruleName)
+  const config = getConfigRule(await getConfig(rootDirectory), ruleName)
   const files = await scanFiles(rootDirectory, config)
+  let promises
 
   const toReturn = {
     status: true,
@@ -32,76 +30,48 @@ export async function compile(
     sourceMaps: [],
     state: []
   }
+  const imports = new Map()
+  const results = new Map()
 
-  const promises = files.map(filePath => {
-    return compileFile(rootDirectory, filePath, config, { imports: [] }).catch(errorCallback)
+  promises = files.map(function(filePath) {
+    return compileFile(rootDirectory, filePath, config).then(function(result) {
+      toReturn.contents.push({path: filePath, contents: result.contents})
+      toReturn.sourceMaps.push({path: filePath, contents: result.sourceMap})
+      toReturn.state.push({path: filePath, state: result.state})
+      imports.set(filePath, result.state.imports)
+      results.set(filePath, result)
+    }, function(e) {
+      toReturn.status = false
+      options.errorCallback(e)
+    })
   })
 
-  const results = await Promise.all(promises)
-  for (const result of results) {
-    if (!result) {
-      toReturn.status = false
-      continue
-    }
+  await Promise.all(promises)
 
-    toReturn.contents.push(result.contents)
-    toReturn.sourceMaps.push(result.sourceMap)
-    toReturn.state.push(result.state)
+  if (options.save) {
+    promises = files.map(function(filePath) {
+      const parents = getParents(imports, filePath)
+      const result = results.get(filePath)
+      if (result && (!parents.length || options.saveIncludedFiles)) {
+        return saveFile(rootDirectory, result, config)
+      }
+    })
 
-    if (saveContents) {
-      await saveFile(rootDirectory, result, config)
-    }
+    await Promise.all(promises)
   }
+
+  results.clear()
+  imports.clear()
 
   return toReturn
 }
 
-export async function compileFile(
-  rootDirectory: string,
-  filePath: string,
-  config: Ucompiler$Config$Rule,
-  state: Object
-): Promise<Ucompiler$Compile$Result> {
-  const fileContents = await read(filePath)
-
-  const plugins = await getPlugins(rootDirectory, config)
-  const result = await execute(plugins, fileContents, {
-    rootDirectory: rootDirectory,
-    filePath: filePath,
-    state: state,
-    config: config
-  })
-
-  return {
-    filePath: filePath,
-    contents: result.contents,
-    sourceMap: result.sourceMap ? fromObject(rootDirectory, filePath, result.sourceMap) : null,
-    state: state
-  }
-}
-
 export async function watch(
   directory: string,
-  ruleName: string,
-  errorCallback: ((error: Error) => void) = function(e) { console.error(e.stack) }
-): Promise {
-  const rootDirectory = await findRoot(directory)
-  const {rule: config} = await getConfig(rootDirectory, ruleName)
-  const targetDirectories = config.include.map(function(entry) {
-    return Path.join(rootDirectory, entry.directory)
-  })
-
-  function onChange(filePath) {
-    compileFile(rootDirectory, filePath, config, { imports: [] }).then(function(result) {
-      saveFile(rootDirectory, result, config)
-    }).catch(errorCallback)
-  }
-
-  const watcher = Chokidar.watch(targetDirectories)
-  watcher.on('change', onChange)
-  watcher.on('add', onChange)
-
-  return new Disposable(function() {
-    watcher.close()
-  })
+  options: UCompiler$Options,
+  ruleNames: Array<string> = []
+): Promise<EventKit$Disposable> {
+  const watcher = await Watcher.create(directory, options, ruleNames)
+  watcher.activate()
+  return watcher
 }

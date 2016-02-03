@@ -12,10 +12,15 @@ if (!parameters.length || knownCommands.indexOf(parameters[0]) === -1) {
   process.exit(0)
 }
 
+const options = {
+  save: true,
+  saveIncludedFiles: false,
+  errorCallback: function(e) {
+    console.log(e.stack)
+  }
+}
 if (parameters[0] === 'go') {
-  UCompiler.compile(process.cwd(), parameters[1] || null, function(e) {
-    console.error(e.stack)
-  }).then(function(result) {
+  UCompiler.compile(process.cwd(), options, parameters[1] || null).then(function(result) {
     if (!result.status) {
       process.exit(1)
     }
@@ -24,7 +29,13 @@ if (parameters[0] === 'go') {
     process.exit(1)
   })
 } else if (parameters[0] === 'watch') {
-  UCompiler.watch(process.cwd(), parameters[1] || null, function(e) {
-    console.error(e.stack)
-  })
+  UCompiler.watch(
+    process.cwd(),
+    options,
+    parameters[1] ?
+      parameters[1]
+        .split(',')
+        .map(function(_) { return _.trim()})
+        .filter(function(_) { return _}) : parameters[1]
+  ).catch(e => console.log(e.stack))
 }

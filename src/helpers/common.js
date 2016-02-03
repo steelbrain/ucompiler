@@ -15,9 +15,13 @@ export const W_OK = 2
 export const NormalizationRegExp = /\\/g
 export const FindCache: Map<string, string> = new Map()
 
+const readFile: ((filePath: string) => Promise<string>) = promisify(FS.readFile)
+
 export const stat: ((filePath: string) => Promise<Stats>) = promisify(FS.lstat)
 export const readdir: ((dirPath: string) => Promise<Array<string>>) = promisify(FS.readdir)
-export const read: ((filePath: string) => Promise<string>) = promisify(FS.read)
+export const read: ((filePath: string) => Promise<string>) = async function(filePath) {
+  return (await readFile(filePath)).toString('utf8')
+}
 export function write(path: string, contents: string): Promise {
  return new Promise(function writeFile(resolve, reject, retry = true) {
    FS.writeFile(path, contents, function(error) {

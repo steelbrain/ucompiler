@@ -40,8 +40,8 @@ Here's an example ucompiler configuration for a project using less and babel plu
       "extensions": ["less"]
     }],
     "exclude": ["vendor/**/*.less"],
-    "outputPath": "styles/{relativePath:4}",
-    "sourceMapPath": "styles/{relativePath:4}"
+    "outputPath": "styles/{relativePath:7}",
+    "sourceMapPath": "styles/{relativePath:7}"
   }]
 }
 ```

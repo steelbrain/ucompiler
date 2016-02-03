@@ -1,6 +1,10 @@
 #### Upcoming
 
 * Stricter plugin result validation
+* Allow passing multiple target watch locations
+* Lock files being written so they are not written twice and thus not emptied
+* Allow ignoring writing of files that are imported anywhere
+* Recompile any importers when a child file changes
 
 #### 3.0.1
 
