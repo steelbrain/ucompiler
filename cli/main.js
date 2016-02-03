@@ -25,7 +25,7 @@ if (parameters[0] === 'go') {
       process.exit(1)
     }
   }, function(e) {
-    errorCallback(e)
+    options.errorCallback(e)
     process.exit(1)
   })
 } else if (parameters[0] === 'watch') {
@@ -37,5 +37,5 @@ if (parameters[0] === 'go') {
         .split(',')
         .map(function(_) { return _.trim()})
         .filter(function(_) { return _}) : parameters[1]
-  ).catch(errorCallback)
+  ).catch(options.errorCallback)
 }
