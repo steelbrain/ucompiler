@@ -1,3 +1,8 @@
+#### 3.1.7
+
+* Fix a bug with watcher where it would watch a single directory once
+* Hide watcher warnings while it's initializing
+
 #### 3.1.6
 
 * Fix a file-specific deadlock in watcher after an error was encountered
