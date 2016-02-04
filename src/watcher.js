@@ -59,10 +59,15 @@ export class Watcher {
       }
     }
 
+    const watchedPaths = new Set()
     for (const ruleName of this.ruleNames) {
       const config = getConfigRule(this.config, ruleName)
       for (const rule of config.include) {
-        watcher.add(Path.join(this.rootDirectory, rule.directory))
+        const directoryPath = Path.join(this.rootDirectory, rule.directory)
+        if (!watchedPaths.has(directoryPath)) {
+          watcher.add(directoryPath)
+          watchedPaths.add(directoryPath)
+        }
       }
     }
 
