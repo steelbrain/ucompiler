@@ -106,11 +106,24 @@ export class Watcher {
           this.rootDirectory, filePath, config.exclude || [], rule.extensions, stats, true
         )) {
           this.locks.add(filePath)
-          const result = await compileFile(this.rootDirectory, filePath, config)
-          this.imports.set(filePath, result.state.imports)
-          this.results.set(filePath, result)
-          if (watcherReady) {
-            await this.writeFile(filePath, result, config)
+          let result
+          let caught = false
+          try {
+            result = await compileFile(this.rootDirectory, filePath, config)
+            this.imports.set(filePath, result.state.imports)
+            this.results.set(filePath, result)
+            if (watcherReady) {
+              await this.writeFile(filePath, result, config)
+            }
+          } catch (_) {
+            caught = _
+          }
+          const parents = getParents(this.imports, filePath)
+          if (!parents.length && caught) {
+            throw caught
+          }
+          for (const parent of parents) {
+            await this.handleChange(parent)
           }
           this.locks.delete(filePath)
           break
@@ -129,9 +142,6 @@ export class Watcher {
     const parents = getParents(this.imports, filePath)
     if (!parents.length || this.options.saveIncludedFiles) {
       await saveFile(this.rootDirectory, result, config)
-    }
-    for (const parent of parents) {
-      this.handleChange(parent)
     }
   }
   dispose() {
