@@ -1,3 +1,7 @@
+#### 3.1.8
+
+* Allow requiring ucompiler plugins from global scope
+
 #### 3.1.7
 
 * Fix a bug with watcher where it would watch a single directory once

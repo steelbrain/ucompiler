@@ -42,17 +42,13 @@ export async function getPlugin(rootDirectory: string, pluginName: string): UCom
   }
   const pluginDirectory = Path.join(rootDirectory, 'node_modules', pluginName)
   if (await exists(pluginDirectory)) {
-
-    try {
-      // $FlowIgnore: Flow does not allow non-literal require paths
-      return require(pluginDirectory)
-    } catch (_) {
-      try {
-        // $FlowIgnore: Flow does not allow non-literal require paths
-        return require(pluginName)
-      } catch (__) {
-        throw _
-      }
-    }
-  } else throw new Error(`'${pluginName}' not found in ${rootDirectory}`)
+    // $FlowIgnore
+    return require(pluginDirectory)
+  }
+  try {
+    // $FlowIgnore
+    return require(pluginDirectory)
+  } catch (_) {
+    throw new Error(`'${pluginName}' not found in ${rootDirectory}`)
+  }
 }
