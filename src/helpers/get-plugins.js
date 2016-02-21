@@ -47,7 +47,7 @@ export async function getPlugin(rootDirectory: string, pluginName: string): UCom
   }
   try {
     // $FlowIgnore
-    return require(pluginDirectory)
+    return require(pluginName)
   } catch (_) {
     throw new Error(`'${pluginName}' not found in ${rootDirectory}`)
   }

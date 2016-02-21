@@ -1,3 +1,7 @@
+#### Upcoming
+
+* Fix a typo
+
 #### 3.1.8
 
 * Allow requiring ucompiler plugins from global scope
