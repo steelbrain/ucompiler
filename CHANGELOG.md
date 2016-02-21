@@ -1,4 +1,4 @@
-#### Upcoming
+#### 3.1.8
 
 * Allow requiring ucompiler plugins from global scope
 * Fix compiling of nested files
