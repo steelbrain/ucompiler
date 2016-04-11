@@ -1,6 +1,6 @@
-#### Upcoming
+#### 3.1.9
 
-* Fix a typo
+* Fix a bug where plugins from NODE_PATH won't work correctly
 
 #### 3.1.8
 
