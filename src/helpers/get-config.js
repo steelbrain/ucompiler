@@ -5,20 +5,20 @@
 import Path from 'path'
 import type {Ucompiler$Config, Ucompiler$Config$Rule} from '../types'
 import {read} from './common'
-import {CONFIG_FILE_NAME} from '../defaults'
+import {CONFIG_FILE_NAMES} from '../defaults'
 
 export async function getConfig(directory: string, ruleName: ?string): Promise<Ucompiler$Config> {
-  const configPath = Path.join(directory, CONFIG_FILE_NAME)
-  let config
-  let rule
-
-  try {
-    config = JSON.parse(await read(configPath))
-  } catch (_) {
-    throw new Error(`Malformed JSON configuration found at ${configPath}`)
+  for (const entry of CONFIG_FILE_NAMES) {
+    const configPath = Path.join(directory, entry)
+    try {
+      return JSON.parse(await read(configPath))
+    } catch (_) {
+      if (_.code !== 'ENOENT') {
+        throw new Error(`Malformed JSON configuration found at ${configPath}`)
+      }
+    }
   }
-
-  return config
+  throw new Error(`No config file found in ${directory}`)
 }
 
 export function getConfigRule(config: Ucompiler$Config, ruleName: ?string): Ucompiler$Config$Rule {

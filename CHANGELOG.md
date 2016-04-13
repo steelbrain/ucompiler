@@ -1,6 +1,7 @@
-#### 3.1.10
+#### 3.2.0
 
 * Fix a bug where lock won't be released on a file in case of an error
+* Add support for `.ucompiler.json`
 
 #### 3.1.9
 

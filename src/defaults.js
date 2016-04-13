@@ -4,7 +4,7 @@
 
 import {Template} from 'string-templates'
 
-export const CONFIG_FILE_NAME: string = '.ucompiler'
+export const CONFIG_FILE_NAMES: Array<string> = ['.ucompiler', '.ucompiler.json']
 export const STATE_FILE_NAME: string = '.ucompiler.state'
 
 export const DEFAULT_IGNORED: Array<string> = [
