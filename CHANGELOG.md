@@ -1,3 +1,7 @@
+#### 3.1.10
+
+* Fix a bug where lock won't be released on a file in case of an error
+
 #### 3.1.9
 
 * Fix a bug where plugins from NODE_PATH won't work correctly

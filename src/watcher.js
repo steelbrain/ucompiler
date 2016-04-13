@@ -120,6 +120,7 @@ export class Watcher {
           }
           const parents = getParents(this.imports, filePath)
           if (!parents.length && caught) {
+            this.locks.delete(filePath)
             throw caught
           }
           for (const parent of parents) {
