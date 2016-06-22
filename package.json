@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/steelbrain/UCompiler#readme",
   "dependencies": {
-    "chokidar": "^1.4.1",
+    "chokidar": "^1.6.0",
     "debug": "^2.2.0",
     "is-glob": "^2.0.1",
     "micromatch": "^2.3.5",
