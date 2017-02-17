@@ -20,7 +20,7 @@
     "chokidar": "^1.4.1",
     "debug": "^2.2.0",
     "is-glob": "^2.0.1",
-    "micromatch": "^2.3.5",
+    "micromatch": "^2.3.8",
     "mkdirp": "^0.5.1",
     "multi-stage-sourcemap": "^0.2.1",
     "sb-event-kit": "^2.0.0",
