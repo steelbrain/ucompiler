@@ -1,6 +1,8 @@
 UCompiler
 =========
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/steelbrain/ucompiler.svg)](https://greenkeeper.io/)
+
 UCompiler is the next generation assets manager. It's built to be extended and provides an easy-to-use plugin API.
 
 #### Installation
